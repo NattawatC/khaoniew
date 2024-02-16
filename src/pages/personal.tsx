@@ -8,7 +8,7 @@ import { useRouter } from "next/router"
 import { PiWarningCircleFill } from "react-icons/pi"
 
 const person1 = {
-  name: "สมชาย",
+  firstName: "สมชาย",
   lastName: "ใจดี",
   age: 30,
   gender: "ชาย",
@@ -38,7 +38,7 @@ const personal: NextPage = () => {
         <div className="flex flex-col gap-4 bg-white rounded-md p-5 text-text text-base">
           <div className="flex flex-col gap-2">
             <p className="font-bold">
-              ชื่อ: <span className="font-normal">{person1.name}</span>
+              ชื่อ: <span className="font-normal">{person1.firstName}</span>
             </p>
             <p className="font-bold">
               นามสกุล: <span className="font-normal">{person1.lastName}</span>
@@ -61,7 +61,7 @@ const personal: NextPage = () => {
           </div>
           <div className="text-[#C31936]">
             <p>โรคประจำตัว:</p>
-            <ul className="px-2 ">
+            <ul className="px-2">
               {person1.medicalCondition.map((condition, index) => (
                 <li key={index}>- {condition}</li>
               ))}

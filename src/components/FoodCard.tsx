@@ -87,7 +87,7 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
           </Button>
         </div>
       ) : (
-        <div></div>
+        null
       )}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
