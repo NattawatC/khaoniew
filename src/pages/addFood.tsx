@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { CalendarIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
+import { NextPage } from "next"
 import { useRouter } from "next/router"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -60,7 +61,10 @@ export function FoodForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 text-text">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8 text-text"
+      >
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-8 bg-white rounded-lg p-5">
             {/* Date */}
@@ -161,11 +165,15 @@ export function FoodForm() {
           </div>
 
           <div className="flex flex-col gap-2 ">
-            <Button className="bg-secondary text-white w-full text-base" type="submit">
+            <Button
+              className="bg-secondary text-white w-full text-base rounded-md"
+              type="submit"
+            >
               บันทึก
             </Button>
             <Button
-              className="border-red-700 text-secondary w-full text-base underline"
+              variant={"outline"}
+              className="border-secondary text-secondary w-full text-base rounded-md"
               onClick={unSubmit}
             >
               ยกเลิก
@@ -177,7 +185,7 @@ export function FoodForm() {
   )
 }
 
-export default function addFood() {
+const addFood: NextPage = () => {
   return (
     <>
       <MainLayout className="flex flex-col bg-primary">
@@ -191,3 +199,5 @@ export default function addFood() {
     </>
   )
 }
+
+export default addFood
