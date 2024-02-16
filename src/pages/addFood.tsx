@@ -96,7 +96,10 @@ export function FoodForm() {
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
+                      <PopoverContent
+                        className="w-auto p-0 bg-white rounded-lg shadow-lg z-10"
+                        align="start"
+                      >
                         <Calendar
                           className="text-base"
                           mode="single"
@@ -132,7 +135,7 @@ export function FoodForm() {
                             <SelectValue placeholder="เลือกมื้ออาหาร" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="text-base">
+                        <SelectContent className="text-base bg-white rounded-lg shadow-lg z-10">
                           <SelectItem value="มื้อเช้า">มื้อเช้า</SelectItem>
                           <SelectItem value="มื้อกลางวัน">
                             มื้อกลางวัน
