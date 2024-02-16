@@ -1,7 +1,7 @@
 "use client"
 
 import { Gumpun } from "@/components/Gumpun"
-import FoodCard from "@/components/foodCard"
+import FoodCard from "@/components/FoodCard"
 import { MainLayout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { NextPage } from "next"
