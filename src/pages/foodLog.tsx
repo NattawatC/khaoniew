@@ -1,7 +1,8 @@
 "use client"
 
-import { Gumpun } from "@/components/Gumpun"
 import FoodCard from "@/components/FoodCard"
+import { Gumpun } from "@/components/Gumpun"
+import { Navbar } from "@/components/Navbar"
 import { MainLayout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { NextPage } from "next"
@@ -44,15 +45,18 @@ const FoodLog: NextPage = () => {
 
   return (
     <>
+      <Navbar />
       <MainLayout className="flex flex-col gap-8 bg-primary">
-        {/* NavBar */}
         <div className="flex flex-col gap-4">
           <h1 className="flex justify-center text-3xl">บันทึกการบริโภค</h1>
           <Gumpun />
         </div>
         <div className="flex flex-col gap-2">
           <p className="text-xl">รายการบริโภควันนี้</p>
-          <Button className="flex w-full text-base gap-2 bg-secondary text-primary rounded-md" onClick={goToAddFood}>
+          <Button
+            className="flex w-full text-base gap-2 bg-secondary text-primary rounded-md"
+            onClick={goToAddFood}
+          >
             เพิ่ม <FaPlus size="12" />
           </Button>
 
