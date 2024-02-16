@@ -1,8 +1,9 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import React from "react"
+import { useRouter } from "next/router"
 
-interface FoodCardProps {
+interface PatientCardProps {
   status: string
   firstName: string
   lastName: string
@@ -11,7 +12,7 @@ interface FoodCardProps {
   medicalCondition: string[]
 }
 
-const PatientCard: React.FunctionComponent<FoodCardProps> = ({
+const PatientCard: React.FunctionComponent<PatientCardProps> = ({
   status,
   firstName,
   lastName,
@@ -19,6 +20,16 @@ const PatientCard: React.FunctionComponent<FoodCardProps> = ({
   gender,
   medicalCondition,
 }) => {
+
+  const router = useRouter()
+
+  const goToReviewPage = () =>{
+    router.push({
+      pathname: '/review',
+      query: { firstName, lastName},
+    });
+  }
+
   return (
     <div className="flex flex-col gap-2 bg-white rounded-md p-5 text-text relative">
       {status === "Not approved" ? (
@@ -56,7 +67,7 @@ const PatientCard: React.FunctionComponent<FoodCardProps> = ({
           ))}
         </ul>
       </div>
-      <Button className="bg-secondary text-white text-base rounded-md">
+      <Button onClick={goToReviewPage} className="bg-secondary text-white text-base rounded-md">
         ดูข้อมูล
       </Button>
     </div>
