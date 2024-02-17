@@ -74,10 +74,10 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
               </AlertDialogHeader>
               <AlertDialogFooter className="flex flex-row items-center gap-2">
                 <AlertDialogAction className="bg-secondary text-white text-base rounded-md border-transparent w-full">
-                  Continue
+                  ลบรายการอาหาร
                 </AlertDialogAction>
                 <AlertDialogCancel className="hover:underline text-base text-secondary rounded-md w-full border-secondary">
-                  Cancel
+                  ยกเลิก
                 </AlertDialogCancel>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -86,9 +86,7 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
             แก้ไข
           </Button>
         </div>
-      ) : (
-        null
-      )}
+      ) : null}
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <p className="font-bold">
@@ -113,22 +111,19 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
 
         <div className="flex flex-col">
           <p className="font-bold">รีวิว :</p>
-          {
-            review && review.trim() !== '' ? (
-                <p>{review}</p>
-            ) : (
-                <p className="text-text opacity-40">รอการรีวิว...</p>
-            )
-          }
+          {review && review.trim() !== "" ? (
+            <p>{review}</p>
+          ) : (
+            <p className="text-text opacity-40">รอการรีวิว...</p>
+          )}
         </div>
         <p className="font-bold">
-          รีวิวโดย : {
-            reviewBy && reviewBy.trim() !== '' ? (
-                <span className="font-normal">{reviewBy}</span>
-            ) : (
-                <span className="font-normal text-text opacity-40">ไม่ระบุ</span>
-            )
-          }
+          รีวิวโดย :{" "}
+          {reviewBy && reviewBy.trim() !== "" ? (
+            <span className="font-normal">{reviewBy}</span>
+          ) : (
+            <span className="font-normal text-text opacity-40">ไม่ระบุ</span>
+          )}
         </p>
       </div>
     </div>
