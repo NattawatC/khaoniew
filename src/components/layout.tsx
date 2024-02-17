@@ -8,7 +8,7 @@ export const MainLayout: React.FunctionComponent<ComponentProps<"main">> = ({
 }) => {
   return (
     <main
-      className={cn(className, "mx-auto w-full max-w-md px-4 py-14 md:py-24")}
+      className={cn(className, "mx-auto w-full max-w-md px-4 py-6 md:py-24")}
       {...props}
     >
       {children}
