@@ -5,6 +5,7 @@ import { Gumpun } from "@/components/Gumpun"
 import { Navbar } from "@/components/Navbar"
 import { MainLayout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
 import { FaPlus } from "react-icons/fa"
@@ -46,45 +47,60 @@ const FoodLog: NextPage = () => {
   return (
     <>
       <Navbar />
-      <MainLayout className="flex flex-col gap-8 bg-primary">
-        <div className="flex flex-col gap-4">
-          <h1 className="flex justify-center text-3xl">บันทึกการบริโภค</h1>
-          <Gumpun />
-        </div>
-        <div className="flex flex-col gap-2">
-          <p className="text-xl">รายการบริโภควันนี้</p>
-          <Button
-            className="flex w-full text-base gap-2 bg-secondary text-primary rounded-md"
-            onClick={goToAddFood}
-          >
-            เพิ่ม <FaPlus size="12" />
-          </Button>
-
-          {props.length === 0 ? (
-            <div className="flex flex-col items-center justify-centers">
-              <p>คุณยังไม่มีรายการบริโภค</p>
-              <p className="flex justify-center">
-                กรุณากด
-                <span className="text-secondary">&nbsp;เพิ่ม +&nbsp;</span>
-                เพื่อสร้างบันทึกใหม่
-              </p>
-            </div>
-          ) : (
+      <MainLayout className="flex flex-col gap-8 bg-primary ">
+        <Tabs defaultValue="บันทึกการบริโภค" className="flex flex-col w-auto gap-8">
+          <TabsList className="w-full text-xl">
+            <TabsTrigger className="text-xl text-text" value="บันทึกการบริโภค">
+              บันทึกการบริโภค
+            </TabsTrigger>
+            <TabsTrigger className="text-xl text-text" value="ประวัติการบริโภค">
+              ประวัติการบริโภค
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="บันทึกการบริโภค" className="flex flex-col gap-8 ">
             <div className="flex flex-col gap-4">
-              {props.map((props, item) => (
-                <FoodCard
-                  key={item}
-                  date={props.date}
-                  meal={props.meal}
-                  foodName={props.foodName}
-                  carbs={props.carbs}
-                  review={props.review}
-                  reviewBy={props.reviewBy}
-                />
-              ))}
+              <h1 className="flex justify-center text-3xl">บันทึกการบริโภค</h1>
+              <Gumpun />
             </div>
-          )}
-        </div>
+            <div className="flex flex-col gap-2">
+              <p className="text-xl">รายการบริโภควันนี้</p>
+              <Button
+                className="flex w-full text-base gap-2 bg-secondary text-primary rounded-md"
+                onClick={goToAddFood}
+              >
+                เพิ่ม <FaPlus size="12" />
+              </Button>
+
+              {props.length === 0 ? (
+                <div className="flex flex-col items-center justify-centers">
+                  <p>คุณยังไม่มีรายการบริโภค</p>
+                  <p className="flex justify-center">
+                    กรุณากด
+                    <span className="text-secondary">&nbsp;เพิ่ม +&nbsp;</span>
+                    เพื่อสร้างบันทึกใหม่
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {props.map((props, item) => (
+                    <FoodCard
+                      key={item}
+                      date={props.date}
+                      meal={props.meal}
+                      foodName={props.foodName}
+                      carbs={props.carbs}
+                      review={props.review}
+                      reviewBy={props.reviewBy}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          <TabsContent value="ประวัติการบริโภค">
+            Change your password here.
+          </TabsContent>
+        </Tabs>
       </MainLayout>
     </>
   )
