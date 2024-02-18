@@ -28,7 +28,6 @@ const personal: NextPage = () => {
 
   return (
     <>
-      <Navbar />
       <MainLayout className="flex flex-col gap-4 bg-primary">
         {/* NavBar */}
         <div className="flex flex-col gap-4">
