@@ -22,6 +22,28 @@ const config = {
         'primary': '#FFEEEF',
         'secondary': '#B12753',
         'text': '#482F33',
+        tremor: {
+          brand: {
+            faint: '#B12753',
+            DEFAULT: '#B12753'
+          },
+          borderRadius: {
+            'tremor-small': '0.375rem',
+            'tremor-default': '0.5rem',
+            'tremor-full': '9999px',
+          },
+          background: {
+            muted: '#B12753',
+            // subtle: colors.gray[800],
+            // DEFAULT: colors.gray[900],
+            // emphasis: colors.gray[300],
+          },
+          content: {
+            subtle: '#482F33',
+          }
+          
+        }
+
       },
       keyframes: {
         "accordion-down": {
