@@ -46,13 +46,13 @@ const LoginForm = () => {
         >
           เข้าสู่ระบบ
         </button>
-        <p className="mt-4 mb-20 text-center">
+        <div className="mt-4 mb-20 text-center">
           ยังไม่มีบัญชี?
           <Link href="/signup">
             {" "}
             <a className=" text-secondary hover:underline"> ลงทะเบียน </a>
           </Link>
-        </p>
+        </div>
         <div className="flex justify-center">
           <div className="w-1/2 h-px bg-gray-400"></div>
         </div>
