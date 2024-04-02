@@ -9,7 +9,8 @@ interface PatientCardProps {
   lastName: string
   age: number
   gender: string
-  medicalCondition: string[]
+  // medicalCondition: string[]
+  medicalCondition: string
 }
 
 const PatientCard: React.FunctionComponent<PatientCardProps> = ({
@@ -59,14 +60,18 @@ const PatientCard: React.FunctionComponent<PatientCardProps> = ({
         <hr className="bg-text opacity-30 rounded h-1" />
       </div>
 
-      <div>
+      <p className="font-bold">
+          - <span className="font-normal">{medicalCondition}</span>
+        </p>
+
+      {/* <div>
         <p className="font-bold text-secondary">โรคประจำตัว</p>
         <ul className="text-base font-normal text-secondary px-2">
           {medicalCondition.map((condition) => (
             <li key={condition}>- {condition}</li>
           ))}
         </ul>
-      </div>
+      </div> */}
       <Button onClick={goToReviewPage} className="bg-secondary text-white text-base rounded-md">
         ดูข้อมูล
       </Button>

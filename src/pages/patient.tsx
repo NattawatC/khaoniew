@@ -5,6 +5,7 @@ import { MainLayout } from "@/components/layout"
 import PatientCard from "@/components/patientCard"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
+import { useState, useEffect } from "react"
 
 const props = [
   {
@@ -31,14 +32,39 @@ const props = [
       "โปรดพิจารณานิสัยการกินของคุณ หากรับประทานอาหารไม่ถูกต้องจะต้องรีบไปพบแพทย์",
     medicalCondition: ["โรคเบาหวาน", "โรคความดันโลหิตสูง"],
   },
-]
+]  
+
+interface PatientData {
+  status: string;
+  name: string;
+  surname: string;
+  age: number;
+  gender: string;
+  medicalCondition: string;
+}
 
 const Patient: NextPage = () => {
-  const router = useRouter()
 
-  const goToAddFood = () => {
-    router.push("/addFood")
-  }
+  const [patients, setPatients] = useState<PatientData[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    fetchPatients();
+  }, []);
+
+  const fetchPatients = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/patients");
+      const data = await response.json();
+      setPatients(data);
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+    }
+  };
+
+  // const goToAddFood = () => {
+  //   router.push("/addFood");
+  // };
 
   return (
     <>
@@ -48,12 +74,12 @@ const Patient: NextPage = () => {
           <h1 className="flex justify-center text-3xl">รายชื่อผู้ใช้</h1>
         </div>
         <div className="flex flex-col gap-4">
-          {props.map((person, item) => (
+          {patients.map((person, index) => (
             <PatientCard
-              key={item}
+              key={index}
               status={person.status}
-              firstName={person.firstName}
-              lastName={person.lastName}
+              firstName={person.name}
+              lastName={person.surname}
               age={person.age}
               gender={person.gender}
               medicalCondition={person.medicalCondition}
@@ -62,7 +88,7 @@ const Patient: NextPage = () => {
         </div>
       </MainLayout>
     </>
-  )
-}
+  );
+};
 
-export default Patient
+export default Patient;
