@@ -61,7 +61,7 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
         </div>
 
         <div className="flex flex-col">
-          <p className="font-bold">รีวิว :</p>
+          <p className="font-bold">ความคิดเห็นจากผู้เชี่ยวชาญ :</p>
           {review && review.trim() !== "" ? (
             <p>{review}</p>
           ) : (
@@ -69,7 +69,7 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
           )}
         </div>
         <p className="font-bold">
-          รีวิวโดย :{" "}
+          โดย :{" "}
           {reviewBy && reviewBy.trim() !== "" ? (
             <span className="font-normal">{reviewBy}</span>
           ) : (
@@ -79,7 +79,7 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button className="bg-secondary text-white p-2 w-full rounded-md">
-              รีวิว
+              ความคิดเห็นจากผู้เชี่ยวชาญ
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -93,11 +93,11 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
                   placeholder="เขียนรีวิว..."
                 />
               </AlertDialogDescription>
-                <p className="font-bold">รีวิวโดย: <span className="font-normal">???</span></p>
+                <p className="font-bold">โดย: <span className="font-normal">???</span></p>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row items-center gap-2">
               <AlertDialogAction className="bg-secondary text-white text-base rounded-md border-transparent w-full">
-                ส่งรีวิว
+                ส่งความคิดเห็น
               </AlertDialogAction>
               <AlertDialogCancel className="hover:underline text-base text-secondary rounded-md w-full border-secondary">
                 ยกเลิก
