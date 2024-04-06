@@ -56,12 +56,12 @@ export function SignupForm() {
 
   return (
     <Form {...form}>
-      <div className="rounded-tl-3xl bg-white w-full flex justify-center">
+      <div className="rounded-tl-[80px] bg-white w-full flex justify-center pt-20 pb-8">
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8 w-3/4"
         >
-          <h1 className="text-4xl mb-20 mt-8 text-center">
+          <h1 className="text-4xl text-center font-bold text-text">
             {" "}
             สร้างบัญชีผู้ใช้{" "}
           </h1>
@@ -70,12 +70,12 @@ export function SignupForm() {
             name="firstname"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>ชื่อจริง:</FormLabel>
+                <FormLabel className="text-base text-text">ชื่อจริง:</FormLabel>
                 <FormControl>
                   <Input
                     /* py-0, px-0, border-0,rounded-none for figma lookalike */
-                    className="py-0 px-0 border-0 rounded-none text-black bg-transparent border-b-2 border-black dark:text-white dark:border-black"
-                    placeholder=""
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    placeholder="John"
                     type="text"
                     required
                     aria-label="Username"
@@ -91,12 +91,12 @@ export function SignupForm() {
             name="lastname"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>นามสกุล:</FormLabel>
+                <FormLabel className="text-base text-text">นามสกุล:</FormLabel>
                 <FormControl>
                   <Input
                     /* py-0, px-0, border-0,rounded-none for figma lookalike */
-                    className="py-0 px-0 border-0 rounded-none text-black bg-transparent border-b-2 border-black dark:text-white dark:border-black"
-                    placeholder=""
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    placeholder="Doe"
                     type="text"
                     required
                     aria-label="Username"
@@ -112,12 +112,12 @@ export function SignupForm() {
             name="age"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>อายุ:</FormLabel>
+                <FormLabel className="text-base text-text">อายุ:</FormLabel>
                 <FormControl>
                   <Input
                     /* py-0, px-0, border-0,rounded-none for figma lookalike */
-                    className="py-0 px-0 border-0 rounded-none text-black bg-transparent border-b-2 border-black dark:text-white dark:border-black"
-                    placeholder=""
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    placeholder="xx"
                     type="text"
                     required
                     aria-label="Age"
@@ -133,12 +133,14 @@ export function SignupForm() {
             name="medicalcondition"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>โรคประจำตัว:</FormLabel>
+                <FormLabel className="text-base text-text">
+                  โรคประจำตัว:
+                </FormLabel>
                 <FormControl>
                   <Input
                     /* py-0, px-0, border-0,rounded-none for figma lookalike */
-                    className="py-0 px-0 border-0 rounded-none text-black bg-transparent border-b-2 border-black dark:text-white dark:border-black"
-                    placeholder=""
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    placeholder="โรคหัวใจ, เบาหวาน"
                     type="text"
                     aria-label="Medical Conditions"
                     {...field}
@@ -153,12 +155,14 @@ export function SignupForm() {
             name="thaiId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>รหัสบัตรประชาชน:</FormLabel>
+                <FormLabel className="text-base text-text">
+                  รหัสบัตรประชาชน:
+                </FormLabel>
                 <FormControl>
                   <Input
                     /* py-0, px-0, border-0,rounded-none for figma lookalike */
-                    className="py-0 px-0 border-0 rounded-none text-black bg-transparent border-b-2 border-black dark:text-white dark:border-black"
-                    placeholder=""
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    placeholder="xxx-xxxx-xxxxxx"
                     type="text"
                     required
                     aria-label="Username"
@@ -174,11 +178,11 @@ export function SignupForm() {
             name="password"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>รหัสผ่าน:</FormLabel>
+                <FormLabel className="text-base text-text">รหัสผ่าน:</FormLabel>
                 <FormControl>
                   <Input
-                    className="py-0 px-0 border-0 rounded-none text-black bg-transparent border-b-2 border-black dark:text-white dark:border-black"
-                    placeholder=""
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    placeholder="********"
                     required
                     type="password"
                     aria-label="password"
@@ -190,12 +194,12 @@ export function SignupForm() {
             )}
           />
           <Button
-            className="bg-secondary rounded-md w-full text-white"
+            className="bg-secondary rounded-md w-full text-white text-base"
             type="submit"
           >
             เข้าสู่ระบบ
           </Button>
-          <div className="text-center">
+          <div className="text-center text-base">
             <Link href="/login">
               มีบัญชีอยู่แล้ว?
               <span className="text-secondary hover:underline">
@@ -207,7 +211,7 @@ export function SignupForm() {
           <div className="flex justify-center">
             <div className="w-1/2 h-px bg-gray-400"></div>
           </div>
-          <p className=" align-bottom text-center">
+          <p className="text-base align-bottom text-center">
             All rights reserves @KhaoNiew.co
           </p>
         </form>
@@ -219,16 +223,16 @@ export function SignupForm() {
 const signup: NextPage = () => {
   return (
     <>
-      <MainLayout>
-        <div className="flex flex-col items-center justify-start min-h-screen bg-primary">
+      <div className="flex flex-col gap-2 bg-primary">
+        <div className="flex flex-col items-center">
           <Image
-            className="h-1/3 w-1/3 mt-20 mb-20"
+            className="h-1/3 w-1/3 mt-12 mb-12"
             src={cloche}
             alt="Cloche"
           />
-          <SignupForm />
         </div>
-      </MainLayout>
+        <SignupForm />
+      </div>
     </>
   )
 }
