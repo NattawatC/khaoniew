@@ -4,10 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import Image from "next/image"
 import { useRouter } from "next/router"
 import { useForm } from "react-hook-form"
-import { ZodNull, ZodNullable, number, z } from "zod"
+import { z } from "zod"
 
 import cloche from "@/assets/cloche.png"
-import { MainLayout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 
 import {
@@ -26,7 +25,7 @@ const formSchema = z.object({
   firstname: z.string(),
   lastname: z.string(),
   age: z.string(),
-  medicalcondition: z.string(),
+  medicalcondition: z.array(z.string()),
   thaiId: z.string(),
   password: z.string(),
 })
@@ -42,16 +41,26 @@ export function SignupForm() {
       firstname: "",
       lastname: "",
       age: "",
-      medicalcondition: "",
+      medicalcondition: [],
       thaiId: "",
       password: "",
     },
   })
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    router.push("/login")
-    console.log(values)
+    const router = useRouter()
+
+    // // If medicalcondition is a string, split it by commas and trim each condition
+    // if (typeof values.medicalcondition === "string") {
+    //   values.medicalcondition = values.medicalcondition
+    //     .split(",")
+    //     .map((condition) => condition.trim())
+    // }
+
+    // // Now values.medicalcondition is either an array or a string of conditions
+    // // Do something with the form values.
+    // router.push("/login")
+    // console.log(values)
   }
 
   return (
@@ -75,7 +84,7 @@ export function SignupForm() {
                   <Input
                     /* py-0, px-0, border-0,rounded-none for figma lookalike */
                     className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
-                    placeholder="John"
+                    placeholder="ทักษิณ"
                     type="text"
                     required
                     aria-label="Username"
@@ -96,7 +105,7 @@ export function SignupForm() {
                   <Input
                     /* py-0, px-0, border-0,rounded-none for figma lookalike */
                     className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
-                    placeholder="Doe"
+                    placeholder="ชินวัตร"
                     type="text"
                     required
                     aria-label="Username"
@@ -197,7 +206,7 @@ export function SignupForm() {
             className="bg-secondary rounded-md w-full text-white text-base"
             type="submit"
           >
-            เข้าสู่ระบบ
+            ตรวจสอบ
           </Button>
           <div className="text-center text-base">
             <Link href="/login">
