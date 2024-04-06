@@ -38,10 +38,30 @@ export function LoginForm() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
-    router.push("/foodLog")
-    console.log(values)
+    try {
+      console.log(values)
+      const response = await fetch("http://localhost:4263/auth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values), // Send the user object from the form values
+      })
+      if (!response.ok) {
+        throw new Error("Login failed")
+      }
+      const data = await response.json()
+      if (data.userType == "staff") {
+        router.push("/patient")
+      }
+      else{
+        router.push("/foodLog")
+      }
+    } catch (error) {
+      setError("Invalid username or password")
+    }
   }
 
   return (
@@ -138,3 +158,6 @@ const login: NextPage = () => {
   )
 }
 export default login
+function setError(arg0: string) {
+  throw new Error("Function not implemented.")
+}
