@@ -23,30 +23,13 @@ import { NextPage } from "next"
 import Link from "next/link"
 
 const formSchema = z.object({
-  username: z.string(),
-  password: z.string(),
-  fullname: z.string(),
-  // firstname: z.string(),
-  // lastname: z.string(),
+  firstname: z.string(),
+  lastname: z.string(),
   age: z.string(),
   medicalcondition: z.string(),
-  // medicalcondition: z.string().array().optional(), // string[] | undefined
+  thaiId: z.string(),
+  password: z.string(),
 })
-// .refine(
-//   (data) => {
-//     // Parse full name into first and last names
-//     if (data.fullname) {
-//       const [firstName, ...lastNameParts] = data.fullname.trim().split(" ")
-//       const lastName = lastNameParts.join(" ")
-//       data.firstname = firstName
-//       data.lastname = lastName
-//     }
-//     return true
-//   },
-//   {
-//     message: "failed to parse names",
-//   }
-// )
 
 export function SignupForm() {
   const router = useRouter()
@@ -56,11 +39,12 @@ export function SignupForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
-      password: "",
-      fullname: "",
+      firstname: "",
+      lastname: "",
       age: "",
       medicalcondition: "",
+      thaiId: "",
+      password: "",
     },
   })
 
@@ -83,10 +67,31 @@ export function SignupForm() {
           </h1>
           <FormField
             control={form.control}
-            name="fullname"
+            name="firstname"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>ชื่อ-สกุล:</FormLabel>
+                <FormLabel>ชื่อจริง:</FormLabel>
+                <FormControl>
+                  <Input
+                    /* py-0, px-0, border-0,rounded-none for figma lookalike */
+                    className="py-0 px-0 border-0 rounded-none text-black bg-transparent border-b-2 border-black dark:text-white dark:border-black"
+                    placeholder=""
+                    type="text"
+                    required
+                    aria-label="Username"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lastname"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>นามสกุล:</FormLabel>
                 <FormControl>
                   <Input
                     /* py-0, px-0, border-0,rounded-none for figma lookalike */
@@ -145,10 +150,10 @@ export function SignupForm() {
           />
           <FormField
             control={form.control}
-            name="username"
+            name="thaiId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>ชื่อผู้ใช้:</FormLabel>
+                <FormLabel>รหัสบัตรประชาชน:</FormLabel>
                 <FormControl>
                   <Input
                     /* py-0, px-0, border-0,rounded-none for figma lookalike */
