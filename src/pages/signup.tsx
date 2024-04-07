@@ -62,7 +62,7 @@ export function SignupForm() {
 
   formSchema.shape
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // remove "-" from phoneNumber and thaiId
     const cleanedValues = {
       ...values,
@@ -80,6 +80,27 @@ export function SignupForm() {
           : undefined,
     }
     console.log(filteredValues)
+
+    try {
+      const response = await fetch("http://localhost:4263/patients", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(filteredValues),
+      })
+
+      if (response.ok) {
+        // Handle success response
+        console.log("Data sent successfully")
+      } else {
+        // Handle error response
+        console.error("Failed to send data")
+      }
+    } catch (error) {
+      // Handle network error
+      console.error("Error sending data:", error)
+    }
   }
 
   return (
