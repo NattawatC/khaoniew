@@ -20,7 +20,7 @@ interface FoodCardProps {
   date: string
   meal: string
   foodName: string
-  carbs: number
+  carbs: string
   review: string
   reviewBy: string
   onDelete: (id: number) => void
@@ -37,7 +37,6 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
   onDelete,
 }) => {
   const [showButton, setShowButton] = useState(false)
-  const patientId = localStorage.getItem("patientId")
 
   const formattedDate = new Date(date).toLocaleDateString("th-TH", {
     day: "2-digit",
