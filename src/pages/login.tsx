@@ -38,13 +38,9 @@ export function LoginForm() {
       password: "",
     },
   })
-  const [patientId, setPatientId] = useState("");
-  
   
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
     try {
-      console.log(values)
       const response = await fetch("http://localhost:4263/auth", {
         method: "POST",
         headers: {

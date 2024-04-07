@@ -12,32 +12,19 @@ import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { FaPlus } from "react-icons/fa"
 
-const props = [
-  {
-    date: "2021-10-10",
-    meal: "มื้อเช้า",
-    foodName: "ข้าวเหนียวหมูทอด",
-    carbs: 50,
-    review: "",
-    reviewBy: "",
-  },
-  {
-    date: "2021-10-10",
-    meal: "มื้อกลางวัน",
-    foodName: "กะเพราหมูสับ",
-    carbs: 50,
-    review: "อร่อยมาก",
-    reviewBy: "เจษฎา",
-  },
-  {
-    date: "2021-10-10",
-    meal: "มื้อเย็น",
-    foodName: "ข้าวมันไก่",
-    carbs: 50,
-    review: "อร่อยมาก",
-    reviewBy: "เจษฎา",
-  },
-]
+interface FoodData {
+  id: number;
+  date: string;
+  mealTime: string;
+  food: {
+    name: string;
+    score: number;
+  };
+  feedback: {
+    review: string;
+    reviewBy: string;
+  };
+}
 
 const data = [
   {
@@ -78,29 +65,55 @@ const data = [
 const FoodLog: NextPage = () => {
   const router = useRouter()
   const [showComparison, setShowComparison] = useState(false)
-  const [foodData, setFoodData] = useState([])
-  const patientId = localStorage.getItem("patientId");
+  const [foodData, setFoodData] = useState<FoodData[]>([]);
+  const patientId = localStorage.getItem("patientId")
+
+  const fetchFoodData = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:4263/patients/${patientId}/meals`
+      )
+      if (!response.ok) {
+        throw new Error("Failed to fetch food data")
+      }
+      const data = await response.json()
+      setFoodData(data)
+    } catch (error) {
+      console.error("Error fetching food data:", error)
+    }
+  }
+
+  const deleteMeal = async (id: number) => {
+    try {
+      const response = await fetch(
+        `http://localhost:4263/patients/${patientId}/meals/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to delete meal");
+      }
+
+      // Fetch meal data again after deletion
+      fetchFoodData();
+    } catch (error) {
+      console.error("Error deleting meal:", error);
+    }
+  };
 
   useEffect(() => {
     if (!patientId) {
-      return; // PatientId is null, do nothing
+      return
     }
 
-    const fetchFoodData = async () => {
-      try {
-        const response = await fetch(`http://localhost:4263/patients/${patientId}/meals`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch food data");
-        }
-        const data = await response.json();
-        setFoodData(data);
-      } catch (error) {
-        console.error("Error fetching food data:", error);
-      }
-    };
+    fetchFoodData()
+  }, [patientId])
 
-    fetchFoodData();
-  }, [patientId]);
+
 
   console.log(foodData)
 
@@ -137,7 +150,7 @@ const FoodLog: NextPage = () => {
                 เพิ่ม <FaPlus size="12" />
               </Button>
 
-              {props.length === 0 ? (
+              {foodData.length === 0 ? (
                 <div className="flex flex-col items-center justify-centers">
                   <p>คุณยังไม่มีรายการบริโภค</p>
                   <p className="flex justify-center">
@@ -148,15 +161,17 @@ const FoodLog: NextPage = () => {
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
-                  {props.map((props, item) => (
+                  {foodData.map((foodItem, index) => (
                     <FoodCard
-                      key={item}
-                      date={props.date}
-                      meal={props.meal}
-                      foodName={props.foodName}
-                      carbs={props.carbs}
-                      review={props.review}
-                      reviewBy={props.reviewBy}
+                      key={index}
+                      id={foodItem.id}
+                      date={foodItem.date}
+                      meal={foodItem.mealTime}
+                      foodName={foodItem.food.name}
+                      carbs={foodItem.food.score}
+                      review={foodItem.feedback.review}
+                      reviewBy={foodItem.feedback.reviewBy}
+                      onDelete={deleteMeal}
                     />
                   ))}
                 </div>

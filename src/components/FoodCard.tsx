@@ -16,23 +16,38 @@ import { FaFistRaised } from "react-icons/fa"
 import { PiWarningCircleFill } from "react-icons/pi"
 
 interface FoodCardProps {
+  id: number
   date: string
   meal: string
   foodName: string
   carbs: number
   review: string
   reviewBy: string
+  onDelete: (id: number) => void;
 }
 
 const FoodCard: React.FunctionComponent<FoodCardProps> = ({
+  id,
   date,
   meal,
   foodName,
   carbs,
   review,
   reviewBy,
+  onDelete
 }) => {
   const [showButton, setShowButton] = useState(false)
+  const patientId = localStorage.getItem("patientId")
+
+  const formattedDate = new Date(date).toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })
+
+  const handleDelete = () => {
+    onDelete(id)
+  }
 
   console.log(showButton)
 
@@ -52,7 +67,7 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
-                className="border-secondary bg-transparent text-secondary p-2 w-full rounded-md"
+                className="border-secondary bg-transparent text-secondary p-2 w-full rounded-md hover:underline"
               >
                 ลบ
               </Button>
@@ -74,7 +89,12 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
               </AlertDialogHeader>
               <AlertDialogFooter className="flex flex-row items-center gap-2">
                 <AlertDialogAction className="bg-secondary text-white text-base rounded-md border-transparent w-full">
-                  ลบรายการอาหาร
+                  <Button
+                    className="bg-transparent w-full"
+                    onClick={handleDelete}
+                  >
+                    ลบรายการอาหาร
+                  </Button>
                 </AlertDialogAction>
                 <AlertDialogCancel className="hover:underline text-base text-secondary rounded-md w-full border-secondary">
                   ยกเลิก
@@ -90,7 +110,8 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <p className="font-bold">
-            บันทึกประจำวันที่ : <span className="font-normal">{date}</span>
+            บันทึกประจำวันที่ :{" "}
+            <span className="font-normal">{formattedDate}</span>
           </p>
           <p className="font-bold">
             มื้ออาหาร : <span className="font-normal">{meal}</span>
@@ -111,7 +132,7 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
 
         <div className="flex flex-col">
           <p className="font-bold">รีวิว :</p>
-          {review && review.trim() !== "" ? (
+          {review && review.trim() !== "รอการรีวิว..." ? (
             <p>{review}</p>
           ) : (
             <p className="text-text opacity-40">รอการรีวิว...</p>
@@ -119,7 +140,7 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
         </div>
         <p className="font-bold">
           รีวิวโดย :{" "}
-          {reviewBy && reviewBy.trim() !== "" ? (
+          {reviewBy && reviewBy.trim() !== "ไม่ระบุ" ? (
             <span className="font-normal">{reviewBy}</span>
           ) : (
             <span className="font-normal text-text opacity-40">ไม่ระบุ</span>
