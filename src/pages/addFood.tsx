@@ -32,25 +32,46 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 const formSchema = z.object({
-  dob: z.date(),
-  meal: z.string(),
-  food: z.string(),
+  date: z.date(),
+  mealTime: z.string(),
+  name: z.string(),
 })
 
 export function FoodForm() {
   const router = useRouter()
+  const patientId = localStorage.getItem("patientId")
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      meal: "",
-      food: "",
+      mealTime: "",
+      name: "",
     },
   })
 
+  console.log(patientId)
+
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
+    try {
+      const response = await fetch(
+        `http://localhost:4263/patients/${patientId}/meals`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      )
+      if (!response.ok) {
+        throw new Error("Failed to create meal")
+      }
+      router.push("/result")
+    } catch (error) {
+      console.error("Error creating meal:", error)
+    }
     // ✅ This will be type-safe and validated.
     console.log(values)
     router.push("/result")
@@ -72,7 +93,7 @@ export function FoodForm() {
             <div>
               <FormField
                 control={form.control}
-                name="dob"
+                name="date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="text-base">
@@ -122,7 +143,7 @@ export function FoodForm() {
             <div>
               <FormField
                 control={form.control}
-                name="meal"
+                name="mealTime"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base">มื้ออาหาร</FormLabel>
@@ -154,7 +175,7 @@ export function FoodForm() {
               {/* Food Name */}
               <FormField
                 control={form.control}
-                name="food"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base">ชื่ออาหาร</FormLabel>
