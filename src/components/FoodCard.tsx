@@ -23,7 +23,7 @@ interface FoodCardProps {
   carbs: number
   review: string
   reviewBy: string
-  onDelete: (id: number) => void;
+  onDelete: (id: number) => void
 }
 
 const FoodCard: React.FunctionComponent<FoodCardProps> = ({
@@ -34,7 +34,7 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
   carbs,
   review,
   reviewBy,
-  onDelete
+  onDelete,
 }) => {
   const [showButton, setShowButton] = useState(false)
   const patientId = localStorage.getItem("patientId")
