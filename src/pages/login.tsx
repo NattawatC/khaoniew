@@ -128,12 +128,12 @@ export function LoginForm() {
             )}
           />
           <Button
-            className="bg-secondary rounded-md w-full text-white"
+            className="bg-secondary rounded-md w-full text-white text-base"
             type="submit"
           >
             เข้าสู่ระบบ
           </Button>
-          <div className="text-center">
+          <div className="text-center text-base">
             <Link href="/signup">
               ยังไม่มีบัญชี?{" "}
               <span className="text-secondary hover:underline">ลงทะเบียน</span>
