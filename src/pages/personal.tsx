@@ -1,11 +1,11 @@
 "use client"
 
+import HealthDescription from "@/components/HealthDescription"
 import { MainLayout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { PiWarningCircleFill } from "react-icons/pi"
 
 interface PatientData {
   thaiId: string
@@ -19,30 +19,16 @@ interface PatientData {
   healthRiskScore: number
 }
 
-//mock data
-const person1 = {
-  firstName: "สมชาย",
-  lastName: "ใจดี",
-  age: 30,
-  gender: "ชาย",
-  address: "123 หมู่ 1 ต.ท่าตูม อ.เมือง จ.เชียงใหม่ 50000",
-  tel: "0812345678",
-  description:
-    "โปรดพิจารณานิสัยการกินของคุณ หากรับประทานอาหารไม่ถูกต้องจะต้องรีบไปพบแพทย์",
-  medicalCondition: ["โรคเบาหวาน", "โรคความดันโลหิตสูง"],
-}
-
 const personal: NextPage = () => {
   const router = useRouter()
   const [patient, setPatient] = useState<PatientData>({} as PatientData)
   const [medicalCondition, setMedicalCondition] = useState<string[]>([])
+  const patientId = localStorage.getItem("patientId")
 
   //value will be received from route later on
-  const thaiId = "111"
-
   //fetch patients table by thaiId
   useEffect(() => {
-    fetch(`http://localhost:4263/patients/${thaiId}`)
+    fetch(`http://localhost:4263/patients/${patientId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok")
@@ -60,7 +46,7 @@ const personal: NextPage = () => {
 
   //fetch medical conditions by thaiId
   useEffect(() => {
-    fetch(`http://localhost:4263/patients/${thaiId}/medicalconditions`)
+    fetch(`http://localhost:4263/patients/${patientId}/medicalconditions`)
       .then((response) => {
         if (!response.ok) {
           throw new Error("Network response was not ok")
@@ -122,14 +108,7 @@ const personal: NextPage = () => {
             </ul>
           </div>
         </div>
-
-        <div className="bg-white rounded-md p-5 text-[#C31936] shadow-lg">
-          <p className="flex flex-row gap-1 items-center text-xl font-bold">
-            <PiWarningCircleFill size={24} />
-            ข้อควรระวัง
-          </p>
-          <p>{person1.description}</p>
-        </div>
+        <HealthDescription score={patient.healthRiskScore} />
         <div className="flex flex-col gap-2">
           <Button
             className="bg-secondary text-white text-base rounded-md"
