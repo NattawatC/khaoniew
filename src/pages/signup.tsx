@@ -71,15 +71,15 @@ export function SignupForm() {
     }
 
     // allow empty medical condition field
-    const filteredValues = {
-      ...cleanedValues,
-      medicalCondition:
-        cleanedValues.medicalCondition &&
-        cleanedValues.medicalCondition.length > 0
-          ? cleanedValues.medicalCondition
-          : undefined,
-    }
-    console.log(filteredValues)
+    // const filteredValues = {
+    //   ...cleanedValues,
+    //   medicalCondition:
+    //     cleanedValues.medicalCondition &&
+    //     cleanedValues.medicalCondition.length > 0
+    //       ? cleanedValues.medicalCondition
+    //       : undefined,
+    // }
+    console.log(values)
 
     try {
       const response = await fetch("http://localhost:4263/patients", {
@@ -87,12 +87,13 @@ export function SignupForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(filteredValues),
+        body: JSON.stringify(values),
       })
 
       if (response.ok) {
         // Handle success response
         console.log("Data sent successfully")
+        router.push("/login")
       } else {
         // Handle error response
         console.error("Failed to send data")
