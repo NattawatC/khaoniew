@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { NextPage } from "next"
 import Link from "next/link"
+import { useState } from "react"
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -37,7 +38,9 @@ export function LoginForm() {
       password: "",
     },
   })
-
+  const [patientId, setPatientId] = useState("");
+  
+  
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     try {
@@ -47,12 +50,19 @@ export function LoginForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values), // Send the user object from the form values
+        body: JSON.stringify({
+          username: values.username,
+          password: values.password,
+        }),
+
       })
       if (!response.ok) {
         throw new Error("Login failed")
       }
+
       const data = await response.json()
+      localStorage.setItem("patientId", data.user.thaiId);
+
       if (data.userType == "staff") {
         router.push("/patient")
       }
