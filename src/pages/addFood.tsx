@@ -35,6 +35,7 @@ const formSchema = z.object({
   date: z.date(),
   mealTime: z.string(),
   name: z.string(),
+  score: z.string(),
 })
 
 export function FoodForm() {
@@ -46,6 +47,7 @@ export function FoodForm() {
     defaultValues: {
       mealTime: "",
       name: "",
+      score: "",
     },
   })
 
@@ -68,8 +70,11 @@ export function FoodForm() {
       if (!response.ok) {
         throw new Error("Failed to create meal")
       }
-      const resultData = await response.json();
-      router.push({ pathname: "/result", query: { data: JSON.stringify(resultData) } });
+      const resultData = await response.json()
+      router.push({
+        pathname: "/result",
+        query: { data: JSON.stringify(resultData), score: values.score },
+      })
     } catch (error) {
       console.error("Error creating meal:", error)
     }
@@ -179,6 +184,22 @@ export function FoodForm() {
                     <FormLabel className="text-base">ชื่ออาหาร</FormLabel>
                     <FormControl className="text-base">
                       <Input placeholder="กะเพรา" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div>
+              {/* Food Carb */}
+              <FormField
+                control={form.control}
+                name="score"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base">คาร์บ</FormLabel>
+                    <FormControl className="text-base">
+                      <Input type="number" placeholder="0" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
