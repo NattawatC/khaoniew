@@ -27,10 +27,19 @@ const formSchema = z.object({
   lastname: z.string(),
   age: z.string(),
   gender: z.string(),
-  medicalcondition: z.array(z.string()).optional(),
+  address: z.string(),
+  phoneNumber: z.string(),
+  medicalCondition: z.array(z.string()).optional(),
   thaiId: z.string(),
   password: z.string(),
 })
+
+const genderOptions = [
+  { label: "-", value: "-" },
+  { label: "ชาย", value: "ชาย" },
+  { label: "หญิง", value: "หญิง" },
+  { label: "อื่นๆ", value: "อื่นๆ" },
+]
 
 export function SignupForm() {
   const router = useRouter()
@@ -42,8 +51,10 @@ export function SignupForm() {
       firstname: "",
       lastname: "",
       age: "",
-      gender: "",
-      medicalcondition: [],
+      gender: "-",
+      address: "",
+      phoneNumber: "",
+      medicalCondition: [],
       thaiId: "",
       password: "",
     },
@@ -52,18 +63,23 @@ export function SignupForm() {
   formSchema.shape
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // const router = useRouter()
-    // // Do something with the form values.
-    const filteredValues = {
+    // remove "-" from phoneNumber and thaiId
+    const cleanedValues = {
       ...values,
-      medicalcondition:
-        values.medicalcondition && values.medicalcondition.length > 0
-          ? values.medicalcondition
+      phoneNumber: values.phoneNumber.replace(/-/g, ""),
+      thaiId: values.thaiId.replace(/-/g, ""),
+    }
+
+    // allow empty medical condition field
+    const filteredValues = {
+      ...cleanedValues,
+      medicalCondition:
+        cleanedValues.medicalCondition &&
+        cleanedValues.medicalCondition.length > 0
+          ? cleanedValues.medicalCondition
           : undefined,
     }
     console.log(filteredValues)
-    // console.log(values)
-    // router.push("/login")
   }
 
   return (
@@ -142,7 +158,73 @@ export function SignupForm() {
           />
           <FormField
             control={form.control}
-            name="medicalcondition"
+            name="gender"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base text-text">เพศ:</FormLabel>
+                <FormControl>
+                  <select
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    {...field}
+                  >
+                    {genderOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base text-text">ที่อยู่:</FormLabel>
+                <FormControl>
+                  <Input
+                    /* py-0, px-0, border-0,rounded-none for figma lookalike */
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    placeholder="ที่อยู่อาศัยปัจจุบัน"
+                    type="text"
+                    required
+                    aria-label="Age"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base text-text">
+                  เบอร์โทรติดต่อ:
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    /* py-0, px-0, border-0,rounded-none for figma lookalike */
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    placeholder="xxx-xxx-xxxx"
+                    type="text"
+                    required
+                    aria-label="Username"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="medicalCondition"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-base text-text">
