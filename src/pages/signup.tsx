@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { NextPage } from "next"
 import Link from "next/link"
+import { useState } from "react"
 
 const formSchema = z.object({
   firstname: z.string(),
@@ -32,8 +33,7 @@ const formSchema = z.object({
 
 export function SignupForm() {
   const router = useRouter()
-  //   const [username, setUsername] = useState("")
-  //   const [password, setPassword] = useState("")
+  const [medicalConditions, setMedicalConditions] = useState<string[]>([])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,20 +47,13 @@ export function SignupForm() {
     },
   })
 
+  formSchema.shape
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const router = useRouter()
-
-    // // If medicalcondition is a string, split it by commas and trim each condition
-    // if (typeof values.medicalcondition === "string") {
-    //   values.medicalcondition = values.medicalcondition
-    //     .split(",")
-    //     .map((condition) => condition.trim())
-    // }
-
-    // // Now values.medicalcondition is either an array or a string of conditions
+    // const router = useRouter()
     // // Do something with the form values.
+    console.log(values)
     // router.push("/login")
-    // console.log(values)
   }
 
   return (
@@ -147,12 +140,18 @@ export function SignupForm() {
                 </FormLabel>
                 <FormControl>
                   <Input
-                    /* py-0, px-0, border-0,rounded-none for figma lookalike */
                     className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
                     placeholder="โรคหัวใจ, เบาหวาน"
                     type="text"
                     aria-label="Medical Conditions"
                     {...field}
+                    onChange={(e) => {
+                      const medicalConditions = e.target.value
+                        .split(",")
+                        .map((condition) => condition.trim())
+                      setMedicalConditions(medicalConditions)
+                      field.onChange(medicalConditions)
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
