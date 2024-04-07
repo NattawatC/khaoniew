@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart } from "@tremor/react"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { FaPlus } from "react-icons/fa"
 
 const props = [
@@ -70,14 +70,39 @@ const data = [
   },
 ]
 
-const dataFormatter = (number: number) =>
-  Intl.NumberFormat("us").format(number).toString()
+// const dataFormatter = (number: number) =>
+//   Intl.NumberFormat("us").format(number).toString()
 
-console.log(dataFormatter(1000000))
+// console.log(dataFormatter(1000000))
 
 const FoodLog: NextPage = () => {
   const router = useRouter()
   const [showComparison, setShowComparison] = useState(false)
+  const [foodData, setFoodData] = useState([])
+  const patientId = localStorage.getItem("patientId");
+
+  useEffect(() => {
+    if (!patientId) {
+      return; // PatientId is null, do nothing
+    }
+
+    const fetchFoodData = async () => {
+      try {
+        const response = await fetch(`http://localhost:4263/patients/${patientId}/meals`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch food data");
+        }
+        const data = await response.json();
+        setFoodData(data);
+      } catch (error) {
+        console.error("Error fetching food data:", error);
+      }
+    };
+
+    fetchFoodData();
+  }, [patientId]);
+
+  console.log(foodData)
 
   const goToAddFood = () => {
     router.push("/addFood")
