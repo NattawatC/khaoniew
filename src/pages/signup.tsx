@@ -70,9 +70,9 @@ export function SignupForm() {
       thaiId: values.thaiId.replace(/-/g, ""),
       healthRiskScore: parseInt(values.healthRiskScore),
     }
-
+    
     console.log(cleanedValues)
-
+    
     try {
       const response = await fetch("http://localhost:4263/patients", {
         method: "POST",
