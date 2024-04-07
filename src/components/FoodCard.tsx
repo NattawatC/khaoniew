@@ -79,7 +79,7 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
                 </AlertDialogTitle>
                 <AlertDialogDescription className="flex flex-col gap-2 text-base">
                   <p>
-                    คุณต้องการจะลบ{foodName}ออกจากบันทึกการบริโภคของคุณหรือไม่
+                    คุณต้องการจะลบ {foodName} ออกจากบันทึกการบริโภคของคุณหรือไม่
                   </p>
                   <p className="flex flex-row items-center justify-center text-secondary">
                     <PiWarningCircleFill className="text-secondary" size={20} />{" "}
