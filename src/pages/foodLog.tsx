@@ -1,7 +1,7 @@
 "use client"
 
 import FoodCard from "@/components/FoodCard"
-import { Gumpun } from "@/components/Gumpun"
+import Gumpun from "@/components/Gumpun"
 import { Navbar } from "@/components/Navbar"
 import { MainLayout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
@@ -9,21 +9,34 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart } from "@tremor/react"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
+import { totalmem } from "os"
 import { useEffect, useState } from "react"
 import { FaPlus } from "react-icons/fa"
 
 interface FoodData {
-  id: number;
-  date: string;
-  mealTime: string;
+  id: number
+  date: string
+  mealTime: string
   food: {
-    name: string;
-    score: number;
-  };
+    name: string
+    score: string
+  }
   feedback: {
-    review: string;
-    reviewBy: string;
-  };
+    review: string
+    reviewBy: string
+  }
+}
+
+interface PatientData {
+  thaiId: string
+  password: string
+  firstname: string
+  lastname: string
+  age: number
+  gender: string
+  address: string
+  phoneNumber: string
+  healthRiskScore: number
 }
 
 const data = [
@@ -65,8 +78,26 @@ const data = [
 const FoodLog: NextPage = () => {
   const router = useRouter()
   const [showComparison, setShowComparison] = useState(false)
-  const [foodData, setFoodData] = useState<FoodData[]>([]);
+  const [patient, setPatient] = useState<PatientData>({} as PatientData)
+  const [foodData, setFoodData] = useState<FoodData[]>([])
   const patientId = localStorage.getItem("patientId")
+
+  useEffect(() => {
+    fetch(`http://localhost:4263/patients/${patientId}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok")
+        }
+        return response.json()
+      })
+      .then((data) => {
+        setPatient(data)
+        console.log("Patient data fetched successfully:", data)
+      })
+      .catch((error) => {
+        console.error("Error fetching patient data:", error)
+      })
+  }, [])
 
   const fetchFoodData = async () => {
     try {
@@ -93,17 +124,17 @@ const FoodLog: NextPage = () => {
             "Content-Type": "application/json",
           },
         }
-      );
+      )
       if (!response.ok) {
-        throw new Error("Failed to delete meal");
+        throw new Error("Failed to delete meal")
       }
 
       // Fetch meal data again after deletion
-      fetchFoodData();
+      fetchFoodData()
     } catch (error) {
-      console.error("Error deleting meal:", error);
+      console.error("Error deleting meal:", error)
     }
-  };
+  }
 
   useEffect(() => {
     if (!patientId) {
@@ -113,9 +144,7 @@ const FoodLog: NextPage = () => {
     fetchFoodData()
   }, [patientId])
 
-
-
-  console.log(foodData)
+  const totalScore = foodData.reduce((acc, curr) => acc + parseInt(curr.food.score), 0)
 
   const goToAddFood = () => {
     router.push("/addFood")
@@ -139,7 +168,7 @@ const FoodLog: NextPage = () => {
               <h1 className="flex justify-center text-3xl pt-8">
                 บันทึกการบริโภค
               </h1>
-              <Gumpun />
+              <Gumpun score={patient.healthRiskScore} totalScore={totalScore}/>
             </div>
             <div className="flex flex-col gap-2">
               <p className="text-xl">รายการบริโภควันนี้</p>
