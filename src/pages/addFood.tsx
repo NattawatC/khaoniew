@@ -68,13 +68,11 @@ export function FoodForm() {
       if (!response.ok) {
         throw new Error("Failed to create meal")
       }
-      router.push("/result")
+      const resultData = await response.json();
+      router.push({ pathname: "/result", query: { data: JSON.stringify(resultData) } });
     } catch (error) {
       console.error("Error creating meal:", error)
     }
-    // ✅ This will be type-safe and validated.
-    console.log(values)
-    router.push("/result")
   }
 
   function unSubmit() {

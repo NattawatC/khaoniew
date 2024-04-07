@@ -20,6 +20,15 @@ const foodData = {
 const result: NextPage = () => {
   const router = useRouter()
 
+  const { data } = router.query
+  const result = JSON.parse(data as string)
+
+  const formattedDate = new Date(result.date).toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })
+
   const goToMainPage = () => {
     router.push("/foodLog")
   }
@@ -36,14 +45,14 @@ const result: NextPage = () => {
           <div className="flex flex-col gap-2">
             <p className="font-bold">
               บันทึกประจำวันที่ :{" "}
-              <span className="font-normal">{foodData.date}</span>
+              <span className="font-normal">{formattedDate}</span>
             </p>
             <p className="font-bold">
-              มื้ออาหาร : <span className="font-normal">{foodData.meal}</span>
+              มื้ออาหาร : <span className="font-normal">{result.mealTime}</span>
             </p>
             <p className="font-bold">
               ชื่ออาหาร :{" "}
-              <span className="font-normal">{foodData.foodName}</span>
+              <span className="font-normal">{result.food.name}</span>
             </p>
             <div className="h-auto">
               <hr className="bg-text opacity-30 rounded h-1" />
