@@ -26,7 +26,8 @@ const formSchema = z.object({
   firstname: z.string(),
   lastname: z.string(),
   age: z.string(),
-  medicalcondition: z.array(z.string()),
+  gender: z.string(),
+  medicalcondition: z.array(z.string()).optional(),
   thaiId: z.string(),
   password: z.string(),
 })
@@ -41,6 +42,7 @@ export function SignupForm() {
       firstname: "",
       lastname: "",
       age: "",
+      gender: "",
       medicalcondition: [],
       thaiId: "",
       password: "",
@@ -52,7 +54,15 @@ export function SignupForm() {
   function onSubmit(values: z.infer<typeof formSchema>) {
     // const router = useRouter()
     // // Do something with the form values.
-    console.log(values)
+    const filteredValues = {
+      ...values,
+      medicalcondition:
+        values.medicalcondition && values.medicalcondition.length > 0
+          ? values.medicalcondition
+          : undefined,
+    }
+    console.log(filteredValues)
+    // console.log(values)
     // router.push("/login")
   }
 
