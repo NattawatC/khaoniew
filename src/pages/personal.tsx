@@ -66,6 +66,10 @@ const personal: NextPage = () => {
     router.push("/foodLog")
   }
 
+  const logout = () => {
+    router.push("/login")
+  }
+
   return (
     <>
       <MainLayout className="flex flex-col gap-4 bg-primary">
@@ -116,7 +120,7 @@ const personal: NextPage = () => {
           >
             กลับสู่หน้าหลัก
           </Button>
-          <Button className="bg-transparent underline text-secondary text-base rounded-md ">
+          <Button className="bg-transparent underline text-secondary text-base rounded-md" onClick={logout}>
             ออกจากระบบ
           </Button>
         </div>
