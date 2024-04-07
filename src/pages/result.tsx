@@ -7,20 +7,10 @@ import { NextPage } from "next"
 import { useRouter } from "next/router"
 import { FaFistRaised } from "react-icons/fa"
 
-const foodData = {
-  date: "2021-10-10",
-  meal: "มื้อเย็น",
-  foodName: "ข้าวมันไก่",
-  carbs: 50,
-  review: "อร่อยมาก",
-  reviewBy: "เจษฎา",
-  gumpun: 3,
-}
-
 const result: NextPage = () => {
   const router = useRouter()
 
-  const { data } = router.query
+  const { data, score } = router.query
   const result = JSON.parse(data as string)
 
   const formattedDate = new Date(result.date).toLocaleDateString("th-TH", {
@@ -57,12 +47,15 @@ const result: NextPage = () => {
             <div className="h-auto">
               <hr className="bg-text opacity-30 rounded h-1" />
             </div>
-            <p className="font-bold">ปริมาณคาร์โบไฮเดรต :</p>
+            <p className="font-bold">
+              ปริมาณคาร์โบไฮเดรต :{" "}
+              <span className="font-normal">{score} กรัม</span> 
+            </p>
           </div>
         </div>
         <div className="flex flex-row items-center gap-2 justify-center px-2 py-3">
           <p className="font-bold text-xl">รวม: </p>
-          <p className="text-base ">{foodData.gumpun}</p>
+          <p className="text-base ">{result.food.score}</p>
           <FaFistRaised size={20} />
         </div>
         <div className="flex flex-col gap-2">
