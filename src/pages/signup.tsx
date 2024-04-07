@@ -30,6 +30,7 @@ const formSchema = z.object({
   address: z.string(),
   phoneNumber: z.string(),
   medicalCondition: z.array(z.string()).optional(),
+  healthRiskScore: z.enum(["0", "1", "2", "3"]),
   thaiId: z.string(),
   password: z.string(),
 })
@@ -57,10 +58,9 @@ export function SignupForm() {
       medicalCondition: [],
       thaiId: "",
       password: "",
+      healthRiskScore: "0",
     },
   })
-
-  formSchema.shape
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // remove "-" from phoneNumber and thaiId
@@ -68,18 +68,10 @@ export function SignupForm() {
       ...values,
       phoneNumber: values.phoneNumber.replace(/-/g, ""),
       thaiId: values.thaiId.replace(/-/g, ""),
+      healthRiskScore: parseInt(values.healthRiskScore),
     }
 
-    // allow empty medical condition field
-    const filteredValues = {
-      ...cleanedValues,
-      medicalCondition:
-        cleanedValues.medicalCondition &&
-        cleanedValues.medicalCondition.length > 0
-          ? cleanedValues.medicalCondition
-          : undefined,
-    }
-    console.log(filteredValues)
+    console.log(cleanedValues)
 
     try {
       const response = await fetch("http://localhost:4263/patients", {
@@ -87,12 +79,13 @@ export function SignupForm() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(filteredValues),
+        body: JSON.stringify(cleanedValues),
       })
 
       if (response.ok) {
         // Handle success response
         console.log("Data sent successfully")
+        router.push("/login")
       } else {
         // Handle error response
         console.error("Failed to send data")
@@ -127,7 +120,7 @@ export function SignupForm() {
                     placeholder="ทักษิณ"
                     type="text"
                     required
-                    aria-label="Username"
+                    aria-label="Firstname"
                     {...field}
                   />
                 </FormControl>
@@ -148,7 +141,7 @@ export function SignupForm() {
                     placeholder="ชินวัตร"
                     type="text"
                     required
-                    aria-label="Username"
+                    aria-label="Lastname"
                     {...field}
                   />
                 </FormControl>
@@ -212,7 +205,7 @@ export function SignupForm() {
                     placeholder="ที่อยู่อาศัยปัจจุบัน"
                     type="text"
                     required
-                    aria-label="Age"
+                    aria-label="Address"
                     {...field}
                   />
                 </FormControl>
@@ -235,7 +228,7 @@ export function SignupForm() {
                     placeholder="xxx-xxx-xxxx"
                     type="text"
                     required
-                    aria-label="Username"
+                    aria-label="phone number"
                     {...field}
                   />
                 </FormControl>
@@ -273,6 +266,28 @@ export function SignupForm() {
           />
           <FormField
             control={form.control}
+            name="healthRiskScore"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel className="text-base text-text">
+                  ระดับความเสี่ยง:
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    className="border-0 rounded-none text-text bg-transparent border-b-2 border-secondary pl-1 ring-transparent text-base"
+                    placeholder="ระดับ: 1-3 (1 = สุขภาพดี)"
+                    required
+                    type="text"
+                    aria-label="Patient Health Risk"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
             name="thaiId"
             render={({ field }) => (
               <FormItem>
@@ -286,7 +301,7 @@ export function SignupForm() {
                     placeholder="xxx-xxxx-xxxxxx"
                     type="text"
                     required
-                    aria-label="Username"
+                    aria-label="Thai Id"
                     {...field}
                   />
                 </FormControl>
