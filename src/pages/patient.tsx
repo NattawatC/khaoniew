@@ -5,62 +5,74 @@ import { MainLayout } from "@/components/layout"
 import PatientCard from "@/components/patientCard"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
 
-const props = [
-  {
-    status: "Not approved",
-    firstName: "สมชาย",
-    lastName: "ใจดี",
-    age: 30,
-    gender: "ชาย",
-    address: "123 หมู่ 1 ต.ท่าตูม อ.เมือง จ.เชียงใหม่ 50000",
-    tel: "0812345678",
-    description:
-      "โปรดพิจารณานิสัยการกินของคุณ หากรับประทานอาหารไม่ถูกต้องจะต้องรีบไปพบแพทย์",
-    medicalCondition: ["โรคเบาหวาน", "โรคความดันโลหิตสูง"],
-  },
-  {
-    status: "Approved",
-    firstName: "สมหญิง",
-    lastName: "ใจดี",
-    age: 30,
-    gender: "หญิง",
-    address: "123 หมู่ 1 ต.ท่าตูม อ.เมือง จ.เชียงใหม่ 50000",
-    tel: "0812345678",
-    description:
-      "โปรดพิจารณานิสัยการกินของคุณ หากรับประทานอาหารไม่ถูกต้องจะต้องรีบไปพบแพทย์",
-    medicalCondition: ["โรคเบาหวาน", "โรคความดันโลหิตสูง"],
-  },
-]  
+interface ThaiId {
+  thaiId: string
+}
 
 interface PatientData {
-  status: string;
-  name: string;
-  surname: string;
-  age: number;
-  gender: string;
-  medicalCondition: string;
+  status: string
+  firstname: string
+  lastname: string
+  age: number
+  gender: string
+  medicalCondition: string
+  thaiId: string
 }
 
 const Patient: NextPage = () => {
+  const [patients, setPatients] = useState<PatientData[]>([])
+  const router = useRouter()
 
-  const [patients, setPatients] = useState<PatientData[]>([]);
-  const router = useRouter();
+  // useEffect(() => {
+  //   fetchPatients()
+  // }, [])
+
+  // const fetchPatients = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:4263/patients")
+  //     const data = await response.json()
+  //     setPatients(data)
+  //     console.log("patients fetched: ", data)
+  //   } catch (error) {
+  //     console.error("Error fetching patients:", error)
+  //   }
+  // }
 
   useEffect(() => {
-    fetchPatients();
-  }, []);
+    const fetchPatientsAndMedicalConditions = async () => {
+      try {
+        const response = await fetch("http://localhost:4263/patients")
+        if (!response.ok) {
+          throw new Error("Failed to fetch patients")
+        }
+        const patientsData = await response.json()
 
-  const fetchPatients = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/patients");
-      const data = await response.json();
-      setPatients(data);
-    } catch (error) {
-      console.error("Error fetching patients:", error);
+        const patientsWithMedicalConditions = await Promise.all(
+          patientsData.map(async (patient: any) => {
+            // Add type any here
+            const medicalConditionsResponse = await fetch(
+              `http://localhost:4263/patients/${patient.thaiId}/medicalconditions`
+            )
+            if (!medicalConditionsResponse.ok) {
+              throw new Error("Failed to fetch medical conditions")
+            }
+            const medicalConditions = await medicalConditionsResponse.json()
+            const medicalConditionString = medicalConditions.join(", ")
+            return { ...patient, medicalCondition: medicalConditionString } // Change property name to match PatientData
+          })
+        )
+
+        setPatients(patientsWithMedicalConditions)
+        console.log(patientsWithMedicalConditions)
+      } catch (error) {
+        console.error("Error fetching patients and medical conditions:", error)
+      }
     }
-  };
+
+    fetchPatientsAndMedicalConditions()
+  }, [])
 
   // const goToAddFood = () => {
   //   router.push("/addFood");
@@ -74,12 +86,12 @@ const Patient: NextPage = () => {
           <h1 className="flex justify-center text-3xl">รายชื่อผู้ใช้</h1>
         </div>
         <div className="flex flex-col gap-4">
-          {patients.map((person, index) => (
+          {patients.map((person) => (
             <PatientCard
-              key={index}
+              key={person.thaiId}
               status={person.status}
-              firstName={person.name}
-              lastName={person.surname}
+              firstName={person.firstname}
+              lastName={person.lastname}
               age={person.age}
               gender={person.gender}
               medicalCondition={person.medicalCondition}
@@ -88,7 +100,7 @@ const Patient: NextPage = () => {
         </div>
       </MainLayout>
     </>
-  );
-};
+  )
+}
 
-export default Patient;
+export default Patient
