@@ -20,7 +20,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { NextPage } from "next"
 import Link from "next/link"
-import { useState } from "react"
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -57,12 +56,12 @@ export function LoginForm() {
       }
 
       const data = await response.json()
-      localStorage.setItem("patientId", data.user.thaiId);
-
       if (data.userType == "staff") {
+        localStorage.setItem("staffName", data.user.fullName)
         router.push("/patient")
       }
       else{
+        localStorage.setItem("patientId", data.user.thaiId);
         router.push("/foodLog")
       }
     } catch (error) {
