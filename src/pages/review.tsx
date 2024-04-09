@@ -1,57 +1,66 @@
-"use client"
-
-import { Gumpun } from "@/components/Gumpun"
+import Gumpun from "@/components/Gumpun"
 import { Navbar } from "@/components/Navbar"
+import ReviewCard from "@/components/ReviewCard"
 import { MainLayout } from "@/components/layout"
+import { Button } from "@/components/ui/button"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
-import ReviewCard from "@/components/ReviewCard"
-import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
 
-const Patientprops = [
-  {
-    status: "Not approved",
-    firstName: "สมชาย",
-    lastName: "ใจดี",
-    age: 30,
-    gender: "ชาย",
-    address: "123 หมู่ 1 ต.ท่าตูม อ.เมือง จ.เชียงใหม่ 50000",
-    tel: "0812345678",
-    description:
-      "โปรดพิจารณานิสัยการกินของคุณ หากรับประทานอาหารไม่ถูกต้องจะต้องรีบไปพบแพทย์",
-    medicalCondition: ["โรคเบาหวาน", "โรคความดันโลหิตสูง"],
-  },
-]
-
-const Foodprops = [
-  {
-    date: "2021-10-10",
-    meal: "มื้อเช้า",
-    foodName: "ข้าวเหนียวหมูทอด",
-    carbs: 50,
-    review: "",
-    reviewBy: "",
-  },
-  {
-    date: "2021-10-10",
-    meal: "มื้อกลางวัน",
-    foodName: "กะเพราหมูสับ",
-    carbs: 50,
-    review: "อร่อยมาก",
-    reviewBy: "เจษฎา",
-  },
-]
-
-
-
+interface FoodData {
+  id: number
+  date: string
+  mealTime: string
+  food: {
+    name: string
+    score: string
+  }
+  feedback: {
+    review: string
+    reviewBy: string
+  }
+}
 
 const Review: NextPage = () => {
   const router = useRouter()
-  const { firstName, lastName } = router.query
+  const [foodData, setFoodData] = useState<FoodData[]>([])
+  const { firstName, lastName, healthRiskScore, patientMealData, thaiId } =
+    router.query
+
+  useEffect(() => {
+    if (patientMealData) {
+      const parsedData: FoodData[] = JSON.parse(patientMealData as string)
+      setFoodData(parsedData)
+    }
+  }, [patientMealData])
+
+  const healthRiskScoreInt =
+    typeof healthRiskScore === "string" ? parseInt(healthRiskScore, 10) : 0
+  const convertedThaiId = String(thaiId)
+
+  const totalScore = foodData.reduce(
+    (acc, curr) => acc + parseInt(curr.food.score),
+    0
+  )
+
+  const updateReviewCallback = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:4263/patients/${thaiId}/meals`
+      )
+      if (!response.ok) {
+        throw new Error("Failed to fetch food data")
+      }
+      const data = await response.json()
+      setFoodData(data)
+    } catch (error) {
+      console.error("Error fetching food data:", error)
+    }
+  }
 
   const goToPatientPage = () => {
     router.push("/patient")
-}
+  }
 
   return (
     <>
@@ -61,28 +70,31 @@ const Review: NextPage = () => {
           <h1 className="flex justify-center text-3xl">
             {firstName} {lastName}
           </h1>
-          <Gumpun />
+          <Gumpun score={healthRiskScoreInt} totalScore={totalScore} />
         </div>
 
         <div className="flex flex-col gap-4">
-          {Foodprops.map((props, item) => (
+          {foodData.map((foodItem, index) => (
             <ReviewCard
-              key={item}
-              date={props.date}
-              meal={props.meal}
-              foodName={props.foodName}
-              carbs={props.carbs}
-              review={props.review}
-              reviewBy={props.reviewBy}
+              key={index}
+              patientId={convertedThaiId}
+              mealId={foodItem.id}
+              date={foodItem.date}
+              meal={foodItem.mealTime}
+              foodName={foodItem.food.name}
+              carbs={foodItem.food.score}
+              review={foodItem.feedback.review}
+              reviewBy={foodItem.feedback.reviewBy}
+              updateReviewCallback={updateReviewCallback}
             />
           ))}
         </div>
         <Button
-            className="bg-secondary text-white text-base rounded-md"
-            onClick={goToPatientPage}
-          >
-            กลับสู่รายชื่อผู้ใช้
-          </Button>
+          className="bg-secondary text-white text-base rounded-md"
+          onClick={goToPatientPage}
+        >
+          กลับสู่รายชื่อผู้ใช้
+        </Button>
       </MainLayout>
     </>
   )
