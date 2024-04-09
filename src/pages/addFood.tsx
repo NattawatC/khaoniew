@@ -1,3 +1,4 @@
+import ImageUploader from "@/components/ImageUploader"
 import { MainLayout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -28,6 +29,7 @@ import { CalendarIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -40,7 +42,9 @@ const formSchema = z.object({
 
 export function FoodForm() {
   const router = useRouter()
-  const patientId = localStorage.getItem("patientId")
+  const [pixelArray, setPixelArray] = useState<number[][] | null>(null)
+  const patientId =
+    typeof window !== "undefined" ? localStorage.getItem("patientId") : null
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,6 +86,55 @@ export function FoodForm() {
 
   function unSubmit() {
     router.push("/foodLog")
+  }
+
+  const [uploadedFiles, setUploadedFiles] = useState<File[] | null>(null)
+
+  // const handleUpload = (files: File[]) => {
+  //   console.log(pixelArray)
+  //   console.log(files)
+  //   setUploadedFiles(files) // Save the uploaded files to state
+  // }
+
+  const handleUpload = async (files: File[]) => {
+    try {
+      const file = files[0] // Assuming only one file is uploaded
+      const imageUrl = URL.createObjectURL(file)
+
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement("canvas")
+        const ctx = canvas.getContext("2d")
+        if (!ctx) {
+          console.error("Canvas context not supported")
+          return
+        }
+        canvas.width = img.width
+        canvas.height = img.height
+        ctx.drawImage(img, 0, 0)
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const pixelArray: number[][] = []
+
+        // Loop through each pixel and extract its RGB values
+        for (let i = 0; i < imageData.data.length; i += 4) {
+          const r = imageData.data[i]
+          const g = imageData.data[i + 1]
+          const b = imageData.data[i + 2]
+          const a = imageData.data[i + 3] // Alpha channel (transparency)
+
+          // Add RGB values to pixelArray
+          pixelArray.push([r, g, b, a])
+        }
+
+        console.log(pixelArray)
+        setPixelArray(pixelArray)
+      }
+
+      img.src = imageUrl
+    } catch (error) {
+      console.error("Error handling upload:", error)
+    }
   }
 
   return (
@@ -207,7 +260,17 @@ export function FoodForm() {
               />
             </div>
           </div>
-
+          <ImageUploader onUpload={handleUpload} />
+          {uploadedFiles && uploadedFiles.length > 0 && (
+            <div>
+              <h2>Uploaded Files:</h2>
+              <ul>
+                {uploadedFiles.map((fileData, index) => (
+                  <li key={index}>{fileData.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="flex flex-col gap-2 ">
             <Button
               className="bg-secondary text-white w-full text-base rounded-md"
