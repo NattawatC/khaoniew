@@ -81,6 +81,7 @@ const FoodLog: NextPage = () => {
   const [patient, setPatient] = useState<PatientData>({} as PatientData)
   const [foodData, setFoodData] = useState<FoodData[]>([])
   const patientId = localStorage.getItem("patientId")
+  const totalScore = foodData.reduce((acc, curr) => acc + parseInt(curr.food.score), 0)
 
   useEffect(() => {
     fetch(`http://localhost:4263/patients/${patientId}`)
@@ -144,7 +145,6 @@ const FoodLog: NextPage = () => {
     fetchFoodData()
   }, [patientId])
 
-  const totalScore = foodData.reduce((acc, curr) => acc + parseInt(curr.food.score), 0)
 
   const goToAddFood = () => {
     router.push("/addFood")
