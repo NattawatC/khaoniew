@@ -49,6 +49,7 @@ const formSchema = z.object({
 export function FoodForm() {
   const router = useRouter()
   const [pixelArray, setPixelArray] = useState<number[][] | null>(null)
+  const [showPopup, setShowPopup] = useState(false)
   const patientId =
     typeof window !== "undefined" ? localStorage.getItem("patientId") : null
   const form = useForm<z.infer<typeof formSchema>>({
@@ -94,93 +95,15 @@ export function FoodForm() {
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
 
-  // const handleUpload = async (files: File[]) => {
-  //   try {
-  //     const file = files[0]
-  //     const imageUrl = URL.createObjectURL(file)
-  //     setUploadedFiles([file])
-  //     const img = new Image()
-  //     img.onload = () => {
-  //       const canvas = document.createElement("canvas")
-  //       const ctx = canvas.getContext("2d")
-  //       if (!ctx) {
-  //         console.error("Canvas context not supported")
-  //         return
-  //       }
-  //       canvas.width = img.width
-  //       canvas.height = img.height
-  //       ctx.drawImage(img, 0, 0)
-
-  //       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  //       const pixelArray: number[][] = []
-
-  //       for (let i = 0; i < imageData.data.length; i += 4) {
-  //         const r = imageData.data[i]
-  //         const g = imageData.data[i + 1]
-  //         const b = imageData.data[i + 2]
-  //         const a = imageData.data[i + 3]
-  //         pixelArray.push([r, g, b, a])
-  //       }
-  //       console.log("image details: ", files)
-  //       console.log("Pixel Array before convert to Byte Array:", pixelArray)
-  //       setPixelArray(pixelArray)
-  //       const byteArray = pixelArray.flatMap((pixel) =>
-  //         pixel.map((value) => value & 0xff)
-  //       )
-  //       const uint8Array = new Uint8Array(byteArray)
-  //       console.log("Pixel Array converted to Byte Array:", uint8Array)
-
-  //       const heightWidthByteArray = new Uint8Array([
-  //         (img.height >> 8) & 0xff,
-  //         img.height & 0xff,
-  //         (img.width >> 8) & 0xff,
-  //         img.width & 0xff,
-  //       ])
-
-  //       console.log(
-  //         "Image size in byte array before concantenation:",
-  //         heightWidthByteArray
-  //       )
-
-  //       const dataToSend = new Uint8Array(
-  //         heightWidthByteArray.length + uint8Array.length
-  //       )
-  //       dataToSend.set(heightWidthByteArray)
-  //       dataToSend.set(uint8Array, heightWidthByteArray.length)
-
-  //       console.log(dataToSend)
-  //       socket.emit("binaryData", dataToSend, (confirmation: Uint8Array) => {
-  //         console.log("Image Sent to AI:", confirmation) // Server's acknowledgment
-  //       })
-
-  //       //sending bytearray without height x width
-  //       // socket.emit("binaryData", uint8Array, (confirmation: Uint8Array) => {
-  //       //   console.log("Image Sent to AI:", confirmation)
-  //       // })
-  //     }
-
-  //     img.src = imageUrl
-  //   } catch (error) {
-  //     console.error("Error handling upload:", error)
-  //   }
-  // }
-
-  const downloadDataAsJson = (data: Uint8Array, filename: string) => {
-    const json = JSON.stringify(data)
-    const blob = new Blob([json], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+  const mockDataFromAi = {
+    carbs: 20.5,
+    foodName: "กะเพรา",
+    foodCertainty: 0.643,
   }
 
   const handleUploadWrapper = (files: File[]) => {
     // Pass null as foodName because it's not available at the time of upload
-    handleUpload(files, "กะเพรา")
+    handleUpload(files, null)
   }
 
   const handleUpload = async (files: File[], foodName: string | null) => {
@@ -272,32 +195,154 @@ export function FoodForm() {
         dataToSendFoodAiManual.set(foodNameByteArray, offsetManual)
 
         console.log("Final dataToSend for foodAiAuto:", dataToSendFoodAiAuto)
-        socket.emit(
-          "binaryData",
-          dataToSendFoodAiAuto,
-          (confirmation: Uint8Array) => {
-            console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
-          }
-        )
+        //send HAPPY PATH to websocket
+        // socket.emit(
+        //   "binaryData",
+        //   dataToSendFoodAiAuto,
+        //   (confirmation: Uint8Array) => {
+        //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+        //   }
+        // )
 
         console.log(
           "Final dataToSend for foodAiManual:",
           dataToSendFoodAiManual
         )
-        socket.emit(
-          "binaryData",
-          dataToSendFoodAiManual,
-          (confirmation: Uint8Array) => {
-            console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
-          }
-        )
+        //send SAD PATH to websocket
+        // socket.emit(
+        //   "binaryData",
+        //   dataToSendFoodAiManual,
+        //   (confirmation: Uint8Array) => {
+        //     console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
+        //   }
+        // )
       }
+
+      setShowPopup(true)
 
       img.src = imageUrl
     } catch (error) {
       console.error("Error handling upload:", error)
     }
   }
+
+  // const handleUpload = async (files: File[], foodName: string | null) => {
+  //   try {
+  //     const file = files[0]
+  //     const imageUrl = URL.createObjectURL(file)
+  //     setUploadedFiles([file])
+
+  //     const img = new Image()
+  //     img.onload = () => {
+  //       const canvas = document.createElement("canvas")
+  //       const ctx = canvas.getContext("2d")
+  //       if (!ctx) {
+  //         console.error("Canvas context not supported")
+  //         return
+  //       }
+  //       canvas.width = img.width
+  //       canvas.height = img.height
+  //       ctx.drawImage(img, 0, 0)
+
+  //       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  //       const pixelArray: number[][] = []
+
+  //       for (let i = 0; i < imageData.data.length; i += 4) {
+  //         const r = imageData.data[i]
+  //         const g = imageData.data[i + 1]
+  //         const b = imageData.data[i + 2]
+  //         const a = imageData.data[i + 3]
+  //         pixelArray.push([r, g, b, a])
+  //       }
+
+  //       console.log("image details: ", files)
+  //       console.log("Pixel Array before convert to Byte Array:", pixelArray)
+  //       setPixelArray(pixelArray)
+  //       const byteArray = pixelArray.flatMap((pixel) =>
+  //         pixel.map((value) => value & 0xff)
+  //       )
+  //       const uint8Array = new Uint8Array(byteArray)
+  //       console.log("Pixel Array converted to Byte Array:", uint8Array)
+
+  //       // Create byte array for height and width
+  //       const heightByteArray = new Uint8Array([
+  //         (img.height >> 8) & 0xff,
+  //         img.height & 0xff,
+  //       ])
+  //       const widthByteArray = new Uint8Array([
+  //         (img.width >> 8) & 0xff,
+  //         img.width & 0xff,
+  //       ])
+
+  //       console.log(
+  //         "Image size in byte array before concatenation:",
+  //         heightByteArray,
+  //         widthByteArray
+  //       )
+
+  //       // Create foodAiAuto version
+  //       const foodAiAutoHeader = new Uint8Array([0])
+  //       const dataToSendFoodAiAuto = new Uint8Array(
+  //         foodAiAutoHeader.length +
+  //           heightByteArray.length +
+  //           widthByteArray.length +
+  //           uint8Array.length
+  //       )
+  //       dataToSendFoodAiAuto.set(foodAiAutoHeader)
+  //       let offsetAuto = foodAiAutoHeader.length
+  //       dataToSendFoodAiAuto.set(heightByteArray, offsetAuto)
+  //       offsetAuto += heightByteArray.length
+  //       dataToSendFoodAiAuto.set(widthByteArray, offsetAuto)
+  //       offsetAuto += widthByteArray.length
+  //       dataToSendFoodAiAuto.set(uint8Array, offsetAuto)
+
+  //       // Create foodAiManual version
+  //       const foodAiManualHeader = new Uint8Array([1])
+  //       const foodNameByteArray = new TextEncoder().encode(foodName || "")
+  //       const nameLengthByteArray = new Uint8Array([
+  //         (foodNameByteArray.length >> 8) & 0xff,
+  //         foodNameByteArray.length & 0xff,
+  //       ])
+  //       const dataToSendFoodAiManual = new Uint8Array(
+  //         foodAiManualHeader.length +
+  //           nameLengthByteArray.length +
+  //           foodNameByteArray.length
+  //       )
+  //       dataToSendFoodAiManual.set(foodAiManualHeader)
+  //       let offsetManual = foodAiManualHeader.length
+  //       dataToSendFoodAiManual.set(nameLengthByteArray, offsetManual)
+  //       offsetManual += nameLengthByteArray.length
+  //       dataToSendFoodAiManual.set(foodNameByteArray, offsetManual)
+
+  //       console.log("Final dataToSend for foodAiAuto:", dataToSendFoodAiAuto)
+  //       //send HAPPY PATH to websocket
+  //       // socket.emit(
+  //       //   "binaryData",
+  //       //   dataToSendFoodAiAuto,
+  //       //   (confirmation: Uint8Array) => {
+  //       //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+  //       //   }
+  //       // )
+
+  //       console.log(
+  //         "Final dataToSend for foodAiManual:",
+  //         dataToSendFoodAiManual
+  //       )
+  //       //send SAD PATH to websocket
+  //       // socket.emit(
+  //       //   "binaryData",
+  //       //   dataToSendFoodAiManual,
+  //       //   (confirmation: Uint8Array) => {
+  //       //     console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
+  //       //   }
+  //       // )
+  //     }
+
+  //     img.src = imageUrl
+  //   } catch (error) {
+  //     console.error("Error handling upload:", error)
+  //   }
+  // }
 
   return (
     <Form {...form}>
@@ -431,6 +476,34 @@ export function FoodForm() {
                   <li key={index}>{fileData.name}</li>
                 ))}
               </ul>
+            </div>
+          )}
+          {showPopup && (
+            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 shadow-lg rounded-md p-6 z-10">
+              <h2 className="text-center mb-2 text-secondary">
+                กรุณาตรวจสอบความถูกต้อง
+              </h2>
+              <p>ชื่ออาหาร: {mockDataFromAi.foodName}</p>
+              <p>คาร์บ: {mockDataFromAi.carbs + " (กรัม)"}</p>
+              <p className="mb-4">
+                ความมั่นใจผลประเมิน: {mockDataFromAi.foodCertainty * 100 + "%"}
+              </p>
+              <div className="flex flex-row gap-2">
+                <Button
+                  variant={"outline"}
+                  className="bg-secondary text-white w-full text-base rounded-md"
+                  onClick={() => setShowPopup(false)}
+                >
+                  ยืนยัน
+                </Button>
+                <Button
+                  variant={"outline"}
+                  className="border-secondary text-secondary w-full text-base rounded-md"
+                  onClick={() => setShowPopup(false)}
+                >
+                  ยกเลิก
+                </Button>
+              </div>
             </div>
           )}
           <div className="flex flex-col gap-2 ">
