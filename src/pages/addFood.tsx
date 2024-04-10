@@ -66,11 +66,13 @@ export function FoodForm() {
   const [foodName, setFoodName] = useState("")
   const [foodCarbs, setFoodCarbs] = useState(0)
   const [showFields, setShowFields] = useState(false)
+
   const [dataToSendFoodAiAuto, setDataToSendFoodAiAuto] = useState<Uint8Array>(
     new Uint8Array()
   )
-  const [dataToSendFoodAiManual, setDataToSendFoodAiManual] =
-    useState<Uint8Array>(new Uint8Array())
+
+  const [showManualInput, setShowManualInput] = useState(false)
+  const [manualFoodName, setManualFoodName] = useState("")
 
   //handle HAPPY Path
   const handleAuto = () => {
@@ -91,17 +93,35 @@ export function FoodForm() {
   //handle SAD Path
   const handleManual = () => {
     // Set the food name and carbs when confirmed
-    setFoodName(mockDataFromAi.foodName)
-    setFoodCarbs(mockDataFromAi.carbs)
-    setShowPopup(false) // Close the message box
-    setShowFields(true) // Show the food name and carbs fields
+    // Create foodAiManual version
+    setShowManualInput(false)
+    const foodAiManualHeader = new Uint8Array([1])
+    const foodNameByteArray = new TextEncoder().encode(manualFoodName || "")
+    const nameLengthByteArray = new Uint8Array([
+      (foodNameByteArray.length >> 8) & 0xff,
+      foodNameByteArray.length & 0xff,
+    ])
+    const dataToSendFoodAiManual = new Uint8Array(
+      foodAiManualHeader.length +
+        nameLengthByteArray.length +
+        foodNameByteArray.length
+    )
+    dataToSendFoodAiManual.set(foodAiManualHeader)
+    let offsetManual = foodAiManualHeader.length
+    dataToSendFoodAiManual.set(nameLengthByteArray, offsetManual)
+    offsetManual += nameLengthByteArray.length
+    dataToSendFoodAiManual.set(foodNameByteArray, offsetManual)
+    console.log("Final dataToSend for foodAiManual:", dataToSendFoodAiManual)
     socket.emit(
       "binaryData",
       dataToSendFoodAiManual,
       (confirmation: Uint8Array) => {
-        console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+        console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
       }
     )
+    setFoodName(manualFoodName)
+    setFoodCarbs(mockDataFromAi.carbs)
+    setShowFields(true) // Show the food name and carbs fields
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -144,10 +164,10 @@ export function FoodForm() {
 
   const handleUploadWrapper = (files: File[]) => {
     // Pass null as foodName because it's not available at the time of upload
-    handleUpload(files, null)
+    handleUpload(files)
   }
 
-  const handleUpload = async (files: File[], foodName: string | null) => {
+  const handleUpload = async (files: File[]) => {
     try {
       const file = files[0]
       const imageUrl = URL.createObjectURL(file)
@@ -218,46 +238,10 @@ export function FoodForm() {
         dataToSendFoodAiAutoInner.set(uint8Array, offsetAuto)
         setDataToSendFoodAiAuto(dataToSendFoodAiAutoInner)
 
-        // Create foodAiManual version
-        const foodAiManualHeader = new Uint8Array([1])
-        const foodNameByteArray = new TextEncoder().encode(foodName || "")
-        const nameLengthByteArray = new Uint8Array([
-          (foodNameByteArray.length >> 8) & 0xff,
-          foodNameByteArray.length & 0xff,
-        ])
-        const dataToSendFoodAiManualInner = new Uint8Array(
-          foodAiManualHeader.length +
-            nameLengthByteArray.length +
-            foodNameByteArray.length
-        )
-        dataToSendFoodAiManualInner.set(foodAiManualHeader)
-        let offsetManual = foodAiManualHeader.length
-        dataToSendFoodAiManualInner.set(nameLengthByteArray, offsetManual)
-        offsetManual += nameLengthByteArray.length
-        dataToSendFoodAiManualInner.set(foodNameByteArray, offsetManual)
-        setDataToSendFoodAiManual(dataToSendFoodAiManualInner)
-
-        console.log("Final dataToSend for foodAiAuto:", dataToSendFoodAiAuto)
-        //send HAPPY PATH to websocket
-        // socket.emit(
-        //   "binaryData",
-        //   dataToSendFoodAiAuto,
-        //   (confirmation: Uint8Array) => {
-        //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
-        //   }
-        // )
         console.log(
-          "Final dataToSend for foodAiManual:",
-          dataToSendFoodAiManual
+          "Final dataToSend for foodAiAuto:",
+          dataToSendFoodAiAutoInner
         )
-        //send SAD PATH to websocket
-        // socket.emit(
-        //   "binaryData",
-        //   dataToSendFoodAiManual,
-        //   (confirmation: Uint8Array) => {
-        //     console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
-        //   }
-        // )
       }
 
       setShowPopup(true)
@@ -545,7 +529,39 @@ export function FoodForm() {
                 <Button
                   variant={"outline"}
                   className="border-secondary text-secondary w-full text-base rounded-md"
-                  onClick={() => setShowPopup(false)}
+                  onClick={() => {
+                    setShowPopup(false)
+                    setShowManualInput(true)
+                  }}
+                >
+                  ยกเลิก
+                </Button>
+              </div>
+            </div>
+          )}
+          {showManualInput && (
+            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 shadow-lg rounded-md p-6 z-10">
+              <div className="flex flex-row gap-2 mt-4">
+                <div>
+                  <label htmlFor="manualFoodName">Enter Food Name:</label>
+                  <input
+                    type="text"
+                    id="manualFoodName"
+                    value={manualFoodName}
+                    onChange={(e) => setManualFoodName(e.target.value)}
+                  />
+                </div>
+                <Button
+                  variant={"outline"}
+                  className="bg-secondary text-white w-full text-base rounded-md"
+                  onClick={() => handleManual()}
+                >
+                  ยืนยัน
+                </Button>
+                <Button
+                  variant={"outline"}
+                  className="border-secondary text-secondary w-full text-base rounded-md"
+                  onClick={() => setShowManualInput(false)}
                 >
                   ยกเลิก
                 </Button>
