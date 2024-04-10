@@ -63,6 +63,47 @@ export function FoodForm() {
 
   console.log(patientId)
 
+  const [foodName, setFoodName] = useState("")
+  const [foodCarbs, setFoodCarbs] = useState(0)
+  const [showFields, setShowFields] = useState(false)
+  const [dataToSendFoodAiAuto, setDataToSendFoodAiAuto] = useState<Uint8Array>(
+    new Uint8Array()
+  )
+  const [dataToSendFoodAiManual, setDataToSendFoodAiManual] =
+    useState<Uint8Array>(new Uint8Array())
+
+  //handle HAPPY Path
+  const handleAuto = () => {
+    // Set the food name and carbs when confirmed
+    setFoodName(mockDataFromAi.foodName)
+    setFoodCarbs(mockDataFromAi.carbs)
+    setShowPopup(false) // Close the message box
+    setShowFields(true) // Show the food name and carbs fields
+    socket.emit(
+      "binaryData",
+      dataToSendFoodAiAuto,
+      (confirmation: Uint8Array) => {
+        console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+      }
+    )
+  }
+
+  //handle SAD Path
+  const handleManual = () => {
+    // Set the food name and carbs when confirmed
+    setFoodName(mockDataFromAi.foodName)
+    setFoodCarbs(mockDataFromAi.carbs)
+    setShowPopup(false) // Close the message box
+    setShowFields(true) // Show the food name and carbs fields
+    socket.emit(
+      "binaryData",
+      dataToSendFoodAiManual,
+      (confirmation: Uint8Array) => {
+        console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+      }
+    )
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     try {
@@ -162,19 +203,20 @@ export function FoodForm() {
 
         // Create foodAiAuto version
         const foodAiAutoHeader = new Uint8Array([0])
-        const dataToSendFoodAiAuto = new Uint8Array(
+        const dataToSendFoodAiAutoInner = new Uint8Array(
           foodAiAutoHeader.length +
             heightByteArray.length +
             widthByteArray.length +
             uint8Array.length
         )
-        dataToSendFoodAiAuto.set(foodAiAutoHeader)
+        dataToSendFoodAiAutoInner.set(foodAiAutoHeader)
         let offsetAuto = foodAiAutoHeader.length
-        dataToSendFoodAiAuto.set(heightByteArray, offsetAuto)
+        dataToSendFoodAiAutoInner.set(heightByteArray, offsetAuto)
         offsetAuto += heightByteArray.length
-        dataToSendFoodAiAuto.set(widthByteArray, offsetAuto)
+        dataToSendFoodAiAutoInner.set(widthByteArray, offsetAuto)
         offsetAuto += widthByteArray.length
-        dataToSendFoodAiAuto.set(uint8Array, offsetAuto)
+        dataToSendFoodAiAutoInner.set(uint8Array, offsetAuto)
+        setDataToSendFoodAiAuto(dataToSendFoodAiAutoInner)
 
         // Create foodAiManual version
         const foodAiManualHeader = new Uint8Array([1])
@@ -183,16 +225,17 @@ export function FoodForm() {
           (foodNameByteArray.length >> 8) & 0xff,
           foodNameByteArray.length & 0xff,
         ])
-        const dataToSendFoodAiManual = new Uint8Array(
+        const dataToSendFoodAiManualInner = new Uint8Array(
           foodAiManualHeader.length +
             nameLengthByteArray.length +
             foodNameByteArray.length
         )
-        dataToSendFoodAiManual.set(foodAiManualHeader)
+        dataToSendFoodAiManualInner.set(foodAiManualHeader)
         let offsetManual = foodAiManualHeader.length
-        dataToSendFoodAiManual.set(nameLengthByteArray, offsetManual)
+        dataToSendFoodAiManualInner.set(nameLengthByteArray, offsetManual)
         offsetManual += nameLengthByteArray.length
-        dataToSendFoodAiManual.set(foodNameByteArray, offsetManual)
+        dataToSendFoodAiManualInner.set(foodNameByteArray, offsetManual)
+        setDataToSendFoodAiManual(dataToSendFoodAiManualInner)
 
         console.log("Final dataToSend for foodAiAuto:", dataToSendFoodAiAuto)
         //send HAPPY PATH to websocket
@@ -203,7 +246,6 @@ export function FoodForm() {
         //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
         //   }
         // )
-
         console.log(
           "Final dataToSend for foodAiManual:",
           dataToSendFoodAiManual
@@ -434,38 +476,42 @@ export function FoodForm() {
                 )}
               />
             </div>
-            <div>
-              {/* Food Name */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">ชื่ออาหาร</FormLabel>
-                    <FormControl className="text-base">
-                      <Input placeholder="กะเพรา" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div>
-              {/* Food Carb */}
-              <FormField
-                control={form.control}
-                name="score"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base">คาร์บ</FormLabel>
-                    <FormControl className="text-base">
-                      <Input type="number" placeholder="0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            {showFields && (
+              <>
+                <div>
+                  {/* Food Name */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base">ชื่ออาหาร</FormLabel>
+                        <FormControl className="text-base">
+                          <Input {...field} value={foodName} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div>
+                  {/* Food Carb */}
+                  <FormField
+                    control={form.control}
+                    name="score"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base">คาร์บ</FormLabel>
+                        <FormControl className="text-base">
+                          <Input {...field} value={foodCarbs} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </>
+            )}
           </div>
           <ImageUploader onUpload={handleUploadWrapper} />
           {uploadedFiles && uploadedFiles.length > 0 && (
@@ -492,7 +538,7 @@ export function FoodForm() {
                 <Button
                   variant={"outline"}
                   className="bg-secondary text-white w-full text-base rounded-md"
-                  onClick={() => setShowPopup(false)}
+                  onClick={() => handleAuto()}
                 >
                   ยืนยัน
                 </Button>
