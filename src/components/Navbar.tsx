@@ -4,7 +4,13 @@ import Cloche from "@/assets/cloche.png"
 import Image from "next/image"
 import { useRouter } from "next/router"
 
-export const Navbar: React.FC = () => {
+interface User {
+  username: string | null
+}
+
+export const Navbar: React.FunctionComponent<User> = ({
+  username
+}) => {
   const router = useRouter()
 
   const goToMainPage = () => {
@@ -12,7 +18,11 @@ export const Navbar: React.FC = () => {
   }
 
   const goToPersonalPage = () => {
-    router.push("/personal")
+    if (!isNaN(Number(username))) {
+      router.push("/personal");
+    } else {
+      router.push("/spersonal");
+    }
   }
 
   return (
