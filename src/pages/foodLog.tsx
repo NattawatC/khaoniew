@@ -152,7 +152,7 @@ const FoodLog: NextPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar username={patientId}/>
       <MainLayout className="flex flex-col gap-8 bg-primary ">
         <Tabs defaultValue="บันทึกการบริโภค" className="flex flex-col w-auto">
           <TabsList className="w-full text-xl">
