@@ -121,18 +121,42 @@ export function FoodForm() {
           const a = imageData.data[i + 3]
           pixelArray.push([r, g, b, a])
         }
-
-        console.log(pixelArray)
-        console.log(files)
+        console.log("image details: ", files)
+        console.log("Pixel Array before convert to Byte Array:", pixelArray)
         setPixelArray(pixelArray)
         const byteArray = pixelArray.flatMap((pixel) =>
           pixel.map((value) => value & 0xff)
         )
         const uint8Array = new Uint8Array(byteArray)
-        console.log(uint8Array)
-        socket.emit("binaryData", uint8Array, (confirmation: Uint8Array) => {
+        console.log("Pixel Array converted to Byte Array:", uint8Array)
+
+        const heightWidthByteArray = new Uint8Array([
+          (img.height >> 8) & 0xff,
+          img.height & 0xff,
+          (img.width >> 8) & 0xff,
+          img.width & 0xff,
+        ])
+
+        console.log(
+          "Image size in byte array before concantenation:",
+          heightWidthByteArray
+        )
+
+        const dataToSend = new Uint8Array(
+          heightWidthByteArray.length + uint8Array.length
+        )
+        dataToSend.set(heightWidthByteArray)
+        dataToSend.set(uint8Array, heightWidthByteArray.length)
+
+        console.log(dataToSend)
+        socket.emit("binaryData", dataToSend, (confirmation: Uint8Array) => {
           console.log("Image Sent to AI:", confirmation) // Server's acknowledgment
         })
+
+        //sending bytearray without height x width
+        // socket.emit("binaryData", uint8Array, (confirmation: Uint8Array) => {
+        //   console.log("Image Sent to AI:", confirmation)
+        // })
       }
 
       img.src = imageUrl
