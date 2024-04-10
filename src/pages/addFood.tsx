@@ -31,7 +31,13 @@ import { NextPage } from "next"
 import { useRouter } from "next/router"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import io from "socket.io-client"
 import { z } from "zod"
+
+const socket = io("ws://localhost:4263")
+socket.on("connect", () => {
+  console.log("Connected to SOCKET server")
+})
 
 const formSchema = z.object({
   date: z.date(),
@@ -45,7 +51,6 @@ export function FoodForm() {
   const [pixelArray, setPixelArray] = useState<number[][] | null>(null)
   const patientId =
     typeof window !== "undefined" ? localStorage.getItem("patientId") : null
-  // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,7 +62,6 @@ export function FoodForm() {
 
   console.log(patientId)
 
-  // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
     try {
@@ -88,19 +92,13 @@ export function FoodForm() {
     router.push("/foodLog")
   }
 
-  const [uploadedFiles, setUploadedFiles] = useState<File[] | null>(null)
-
-  // const handleUpload = (files: File[]) => {
-  //   console.log(pixelArray)
-  //   console.log(files)
-  //   setUploadedFiles(files) // Save the uploaded files to state
-  // }
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
 
   const handleUpload = async (files: File[]) => {
     try {
-      const file = files[0] // Assuming only one file is uploaded
+      const file = files[0]
       const imageUrl = URL.createObjectURL(file)
-
+      setUploadedFiles([file])
       const img = new Image()
       img.onload = () => {
         const canvas = document.createElement("canvas")
@@ -116,19 +114,25 @@ export function FoodForm() {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
         const pixelArray: number[][] = []
 
-        // Loop through each pixel and extract its RGB values
         for (let i = 0; i < imageData.data.length; i += 4) {
           const r = imageData.data[i]
           const g = imageData.data[i + 1]
           const b = imageData.data[i + 2]
-          const a = imageData.data[i + 3] // Alpha channel (transparency)
-
-          // Add RGB values to pixelArray
+          const a = imageData.data[i + 3]
           pixelArray.push([r, g, b, a])
         }
 
         console.log(pixelArray)
+        console.log(files)
         setPixelArray(pixelArray)
+        const byteArray = pixelArray.flatMap((pixel) =>
+          pixel.map((value) => value & 0xff)
+        )
+        const uint8Array = new Uint8Array(byteArray)
+        console.log(uint8Array)
+        socket.emit("binaryData", uint8Array, (confirmation: Uint8Array) => {
+          console.log("Image Sent to AI:", confirmation) // Server's acknowledgment
+        })
       }
 
       img.src = imageUrl
@@ -263,7 +267,7 @@ export function FoodForm() {
           <ImageUploader onUpload={handleUpload} />
           {uploadedFiles && uploadedFiles.length > 0 && (
             <div>
-              <h2>Uploaded Files:</h2>
+              <h2>ไฟล์ของคุณ:</h2>
               <ul>
                 {uploadedFiles.map((fileData, index) => (
                   <li key={index}>{fileData.name}</li>

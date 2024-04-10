@@ -1,4 +1,4 @@
-import React, { useCallback } from "react"
+import React, { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
 
 interface ImageUploaderProps {
@@ -6,12 +6,16 @@ interface ImageUploaderProps {
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload }) => {
+  const [fileUploaded, setFileUploaded] = useState<boolean>(false)
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      // Do something with the uploaded files
-      onUpload(acceptedFiles)
+      if (!fileUploaded) {
+        onUpload(acceptedFiles)
+        setFileUploaded(true)
+      }
     },
-    [onUpload]
+    [fileUploaded, onUpload]
   )
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop })
@@ -22,6 +26,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onUpload }) => {
     padding: "20px",
     textAlign: "center",
     cursor: "pointer",
+    display: fileUploaded ? "none" : "block", // Hide the dropzone if fileUploaded is true
   }
 
   return (
