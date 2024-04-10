@@ -24,6 +24,7 @@ interface PatientStatus {
 const Patient: NextPage = () => {
   const [patients, setPatients] = useState<PatientData[]>([])
   const [status, setStatus] = useState<PatientStatus[]>([])
+  const staffName = localStorage.getItem("staffName")
 
   useEffect(() => {
     const fetchPatientsAndMedicalConditions = async () => {
@@ -103,7 +104,7 @@ const Patient: NextPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar username={staffName}/>
       <MainLayout className="flex flex-col gap-4 bg-primary">
         <div className="flex flex-col gap-4">
           <h1 className="flex justify-center text-3xl">รายชื่อผู้ใช้</h1>
