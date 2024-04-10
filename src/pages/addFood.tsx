@@ -94,11 +94,101 @@ export function FoodForm() {
 
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
 
-  const handleUpload = async (files: File[]) => {
+  // const handleUpload = async (files: File[]) => {
+  //   try {
+  //     const file = files[0]
+  //     const imageUrl = URL.createObjectURL(file)
+  //     setUploadedFiles([file])
+  //     const img = new Image()
+  //     img.onload = () => {
+  //       const canvas = document.createElement("canvas")
+  //       const ctx = canvas.getContext("2d")
+  //       if (!ctx) {
+  //         console.error("Canvas context not supported")
+  //         return
+  //       }
+  //       canvas.width = img.width
+  //       canvas.height = img.height
+  //       ctx.drawImage(img, 0, 0)
+
+  //       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+  //       const pixelArray: number[][] = []
+
+  //       for (let i = 0; i < imageData.data.length; i += 4) {
+  //         const r = imageData.data[i]
+  //         const g = imageData.data[i + 1]
+  //         const b = imageData.data[i + 2]
+  //         const a = imageData.data[i + 3]
+  //         pixelArray.push([r, g, b, a])
+  //       }
+  //       console.log("image details: ", files)
+  //       console.log("Pixel Array before convert to Byte Array:", pixelArray)
+  //       setPixelArray(pixelArray)
+  //       const byteArray = pixelArray.flatMap((pixel) =>
+  //         pixel.map((value) => value & 0xff)
+  //       )
+  //       const uint8Array = new Uint8Array(byteArray)
+  //       console.log("Pixel Array converted to Byte Array:", uint8Array)
+
+  //       const heightWidthByteArray = new Uint8Array([
+  //         (img.height >> 8) & 0xff,
+  //         img.height & 0xff,
+  //         (img.width >> 8) & 0xff,
+  //         img.width & 0xff,
+  //       ])
+
+  //       console.log(
+  //         "Image size in byte array before concantenation:",
+  //         heightWidthByteArray
+  //       )
+
+  //       const dataToSend = new Uint8Array(
+  //         heightWidthByteArray.length + uint8Array.length
+  //       )
+  //       dataToSend.set(heightWidthByteArray)
+  //       dataToSend.set(uint8Array, heightWidthByteArray.length)
+
+  //       console.log(dataToSend)
+  //       socket.emit("binaryData", dataToSend, (confirmation: Uint8Array) => {
+  //         console.log("Image Sent to AI:", confirmation) // Server's acknowledgment
+  //       })
+
+  //       //sending bytearray without height x width
+  //       // socket.emit("binaryData", uint8Array, (confirmation: Uint8Array) => {
+  //       //   console.log("Image Sent to AI:", confirmation)
+  //       // })
+  //     }
+
+  //     img.src = imageUrl
+  //   } catch (error) {
+  //     console.error("Error handling upload:", error)
+  //   }
+  // }
+
+  const downloadDataAsJson = (data: Uint8Array, filename: string) => {
+    const json = JSON.stringify(data)
+    const blob = new Blob([json], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleUploadWrapper = (files: File[]) => {
+    // Pass null as foodName because it's not available at the time of upload
+    handleUpload(files, "กะเพรา")
+  }
+
+  const handleUpload = async (files: File[], foodName: string | null) => {
     try {
       const file = files[0]
       const imageUrl = URL.createObjectURL(file)
       setUploadedFiles([file])
+
       const img = new Image()
       img.onload = () => {
         const canvas = document.createElement("canvas")
@@ -121,6 +211,7 @@ export function FoodForm() {
           const a = imageData.data[i + 3]
           pixelArray.push([r, g, b, a])
         }
+
         console.log("image details: ", files)
         console.log("Pixel Array before convert to Byte Array:", pixelArray)
         setPixelArray(pixelArray)
@@ -130,33 +221,76 @@ export function FoodForm() {
         const uint8Array = new Uint8Array(byteArray)
         console.log("Pixel Array converted to Byte Array:", uint8Array)
 
-        const heightWidthByteArray = new Uint8Array([
+        // Create byte array for height and width
+        const heightByteArray = new Uint8Array([
           (img.height >> 8) & 0xff,
           img.height & 0xff,
+        ])
+        const widthByteArray = new Uint8Array([
           (img.width >> 8) & 0xff,
           img.width & 0xff,
         ])
 
         console.log(
-          "Image size in byte array before concantenation:",
-          heightWidthByteArray
+          "Image size in byte array before concatenation:",
+          heightByteArray,
+          widthByteArray
         )
 
-        const dataToSend = new Uint8Array(
-          heightWidthByteArray.length + uint8Array.length
+        // Create foodAiAuto version
+        const foodAiAutoHeader = new Uint8Array([0])
+        const dataToSendFoodAiAuto = new Uint8Array(
+          foodAiAutoHeader.length +
+            heightByteArray.length +
+            widthByteArray.length +
+            uint8Array.length
         )
-        dataToSend.set(heightWidthByteArray)
-        dataToSend.set(uint8Array, heightWidthByteArray.length)
+        dataToSendFoodAiAuto.set(foodAiAutoHeader)
+        let offsetAuto = foodAiAutoHeader.length
+        dataToSendFoodAiAuto.set(heightByteArray, offsetAuto)
+        offsetAuto += heightByteArray.length
+        dataToSendFoodAiAuto.set(widthByteArray, offsetAuto)
+        offsetAuto += widthByteArray.length
+        dataToSendFoodAiAuto.set(uint8Array, offsetAuto)
 
-        console.log(dataToSend)
-        socket.emit("binaryData", dataToSend, (confirmation: Uint8Array) => {
-          console.log("Image Sent to AI:", confirmation) // Server's acknowledgment
-        })
+        // Create foodAiManual version
+        const foodAiManualHeader = new Uint8Array([1])
+        const foodNameByteArray = new TextEncoder().encode(foodName || "")
+        const nameLengthByteArray = new Uint8Array([
+          (foodNameByteArray.length >> 8) & 0xff,
+          foodNameByteArray.length & 0xff,
+        ])
+        const dataToSendFoodAiManual = new Uint8Array(
+          foodAiManualHeader.length +
+            nameLengthByteArray.length +
+            foodNameByteArray.length
+        )
+        dataToSendFoodAiManual.set(foodAiManualHeader)
+        let offsetManual = foodAiManualHeader.length
+        dataToSendFoodAiManual.set(nameLengthByteArray, offsetManual)
+        offsetManual += nameLengthByteArray.length
+        dataToSendFoodAiManual.set(foodNameByteArray, offsetManual)
 
-        //sending bytearray without height x width
-        // socket.emit("binaryData", uint8Array, (confirmation: Uint8Array) => {
-        //   console.log("Image Sent to AI:", confirmation)
-        // })
+        console.log("Final dataToSend for foodAiAuto:", dataToSendFoodAiAuto)
+        socket.emit(
+          "binaryData",
+          dataToSendFoodAiAuto,
+          (confirmation: Uint8Array) => {
+            console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+          }
+        )
+
+        console.log(
+          "Final dataToSend for foodAiManual:",
+          dataToSendFoodAiManual
+        )
+        socket.emit(
+          "binaryData",
+          dataToSendFoodAiManual,
+          (confirmation: Uint8Array) => {
+            console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
+          }
+        )
       }
 
       img.src = imageUrl
@@ -288,7 +422,7 @@ export function FoodForm() {
               />
             </div>
           </div>
-          <ImageUploader onUpload={handleUpload} />
+          <ImageUploader onUpload={handleUploadWrapper} />
           {uploadedFiles && uploadedFiles.length > 0 && (
             <div>
               <h2>ไฟล์ของคุณ:</h2>
