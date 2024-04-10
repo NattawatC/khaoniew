@@ -65,7 +65,8 @@ export function LoginForm() {
         router.push("/foodLog")
       }
     } catch (error) {
-      setError("Invalid username or password")
+      return
+      // setError("Invalid username or password")
     }
   }
 
@@ -163,6 +164,6 @@ const login: NextPage = () => {
   )
 }
 export default login
-function setError(arg0: string) {
-  throw new Error("Function not implemented.")
-}
+// function setError(arg0: string) {
+//   throw new Error("Function not implemented.")
+// }
