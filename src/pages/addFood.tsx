@@ -39,6 +39,13 @@ socket.on("connect", () => {
   console.log("Connected to SOCKET server")
 })
 
+interface AiProp {
+  carbs: string
+  foodName: string
+  foodCertainty: number
+  error: string[]
+}
+
 const formSchema = z.object({
   date: z.date(),
   mealTime: z.string(),
@@ -47,6 +54,7 @@ const formSchema = z.object({
 })
 
 export function FoodForm() {
+  const { setValue } = useForm()
   const router = useRouter()
   const [pixelArray, setPixelArray] = useState<number[][] | null>(null)
   const [showPopup, setShowPopup] = useState(false)
@@ -63,9 +71,10 @@ export function FoodForm() {
 
   console.log(patientId)
 
-  const [foodName, setFoodName] = useState("")
-  const [foodCarbs, setFoodCarbs] = useState(0)
+  const [foodName, setFoodName] = useState<string>("")
+  const [foodCarbs, setFoodCarbs] = useState<string>("")
   const [showFields, setShowFields] = useState(false)
+  const [foodNameValue, setFoodNameValue] = useState("")
 
   const [dataToSendFoodAiAuto, setDataToSendFoodAiAuto] = useState<Uint8Array>(
     new Uint8Array()
@@ -73,21 +82,30 @@ export function FoodForm() {
 
   const [showManualInput, setShowManualInput] = useState(false)
   const [manualFoodName, setManualFoodName] = useState("")
+  const [aiData, setAiData] = useState<AiProp | null>(null)
 
   //handle HAPPY Path
+  // useEffect(() => {
   const handleAuto = () => {
     // Set the food name and carbs when confirmed
-    setFoodName(mockDataFromAi.foodName)
-    setFoodCarbs(mockDataFromAi.carbs)
+    // setFoodName(mockDataFromAi.foodName)
+    // setFoodCarbs(mockDataFromAi.carbs)
     setShowPopup(false) // Close the message box
     setShowFields(true) // Show the food name and carbs fields
-    socket.emit(
-      "binaryData",
-      dataToSendFoodAiAuto,
-      (confirmation: Uint8Array) => {
-        console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
-      }
-    )
+    // socket.emit(
+    //   "binaryData",
+    //   dataToSendFoodAiAuto,
+    //   (confirmation: Uint8Array) => {
+    //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+    //   }
+    // )
+    socket.off("fileChanged")
+    socket.on("fileChanged", ({ content }) => {
+      setAiData(content)
+      setShowPopup(true)
+      // console.log(`File ${path} has been changed. Content: ${content}`)
+      // Handle the received data as needed
+    })
   }
 
   //handle SAD Path
@@ -119,8 +137,6 @@ export function FoodForm() {
         console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
       }
     )
-    setFoodName(manualFoodName)
-    setFoodCarbs(mockDataFromAi.carbs)
     setShowFields(true) // Show the food name and carbs fields
   }
 
@@ -134,7 +150,11 @@ export function FoodForm() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(values),
+          body: JSON.stringify({
+            ...values,
+            name: aiData?.foodName || "", 
+            score: aiData?.carbs || "",
+          }),
         }
       )
       if (!response.ok) {
@@ -143,7 +163,7 @@ export function FoodForm() {
       const resultData = await response.json()
       router.push({
         pathname: "/result",
-        query: { data: JSON.stringify(resultData), score: values.score },
+        query: { data: JSON.stringify(resultData), score: aiData?.carbs },
       })
     } catch (error) {
       console.error("Error creating meal:", error)
@@ -236,139 +256,37 @@ export function FoodForm() {
         dataToSendFoodAiAutoInner.set(widthByteArray, offsetAuto)
         offsetAuto += widthByteArray.length
         dataToSendFoodAiAutoInner.set(uint8Array, offsetAuto)
-        setDataToSendFoodAiAuto(dataToSendFoodAiAutoInner)
+
+        socket.emit(
+          "binaryData",
+          dataToSendFoodAiAutoInner,
+          (confirmation: Uint8Array) => {
+            console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+          }
+        )
+
+        socket.off("fileChanged")
+        socket.on("fileChanged", ({ content }) => {
+          console.log({ content })
+          setAiData(content)
+          setValue("name", aiData?.foodName || "");
+          setShowPopup(true)
+          // console.log(`File ${path} has been changed. Content: ${content}`)
+          // Handle the received data as needed
+        })
 
         console.log(
           "Final dataToSend for foodAiAuto:",
           dataToSendFoodAiAutoInner
         )
       }
-
-      setShowPopup(true)
-
       img.src = imageUrl
     } catch (error) {
       console.error("Error handling upload:", error)
     }
   }
 
-  // const handleUpload = async (files: File[], foodName: string | null) => {
-  //   try {
-  //     const file = files[0]
-  //     const imageUrl = URL.createObjectURL(file)
-  //     setUploadedFiles([file])
-
-  //     const img = new Image()
-  //     img.onload = () => {
-  //       const canvas = document.createElement("canvas")
-  //       const ctx = canvas.getContext("2d")
-  //       if (!ctx) {
-  //         console.error("Canvas context not supported")
-  //         return
-  //       }
-  //       canvas.width = img.width
-  //       canvas.height = img.height
-  //       ctx.drawImage(img, 0, 0)
-
-  //       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-  //       const pixelArray: number[][] = []
-
-  //       for (let i = 0; i < imageData.data.length; i += 4) {
-  //         const r = imageData.data[i]
-  //         const g = imageData.data[i + 1]
-  //         const b = imageData.data[i + 2]
-  //         const a = imageData.data[i + 3]
-  //         pixelArray.push([r, g, b, a])
-  //       }
-
-  //       console.log("image details: ", files)
-  //       console.log("Pixel Array before convert to Byte Array:", pixelArray)
-  //       setPixelArray(pixelArray)
-  //       const byteArray = pixelArray.flatMap((pixel) =>
-  //         pixel.map((value) => value & 0xff)
-  //       )
-  //       const uint8Array = new Uint8Array(byteArray)
-  //       console.log("Pixel Array converted to Byte Array:", uint8Array)
-
-  //       // Create byte array for height and width
-  //       const heightByteArray = new Uint8Array([
-  //         (img.height >> 8) & 0xff,
-  //         img.height & 0xff,
-  //       ])
-  //       const widthByteArray = new Uint8Array([
-  //         (img.width >> 8) & 0xff,
-  //         img.width & 0xff,
-  //       ])
-
-  //       console.log(
-  //         "Image size in byte array before concatenation:",
-  //         heightByteArray,
-  //         widthByteArray
-  //       )
-
-  //       // Create foodAiAuto version
-  //       const foodAiAutoHeader = new Uint8Array([0])
-  //       const dataToSendFoodAiAuto = new Uint8Array(
-  //         foodAiAutoHeader.length +
-  //           heightByteArray.length +
-  //           widthByteArray.length +
-  //           uint8Array.length
-  //       )
-  //       dataToSendFoodAiAuto.set(foodAiAutoHeader)
-  //       let offsetAuto = foodAiAutoHeader.length
-  //       dataToSendFoodAiAuto.set(heightByteArray, offsetAuto)
-  //       offsetAuto += heightByteArray.length
-  //       dataToSendFoodAiAuto.set(widthByteArray, offsetAuto)
-  //       offsetAuto += widthByteArray.length
-  //       dataToSendFoodAiAuto.set(uint8Array, offsetAuto)
-
-  //       // Create foodAiManual version
-  //       const foodAiManualHeader = new Uint8Array([1])
-  //       const foodNameByteArray = new TextEncoder().encode(foodName || "")
-  //       const nameLengthByteArray = new Uint8Array([
-  //         (foodNameByteArray.length >> 8) & 0xff,
-  //         foodNameByteArray.length & 0xff,
-  //       ])
-  //       const dataToSendFoodAiManual = new Uint8Array(
-  //         foodAiManualHeader.length +
-  //           nameLengthByteArray.length +
-  //           foodNameByteArray.length
-  //       )
-  //       dataToSendFoodAiManual.set(foodAiManualHeader)
-  //       let offsetManual = foodAiManualHeader.length
-  //       dataToSendFoodAiManual.set(nameLengthByteArray, offsetManual)
-  //       offsetManual += nameLengthByteArray.length
-  //       dataToSendFoodAiManual.set(foodNameByteArray, offsetManual)
-
-  //       console.log("Final dataToSend for foodAiAuto:", dataToSendFoodAiAuto)
-  //       //send HAPPY PATH to websocket
-  //       // socket.emit(
-  //       //   "binaryData",
-  //       //   dataToSendFoodAiAuto,
-  //       //   (confirmation: Uint8Array) => {
-  //       //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
-  //       //   }
-  //       // )
-
-  //       console.log(
-  //         "Final dataToSend for foodAiManual:",
-  //         dataToSendFoodAiManual
-  //       )
-  //       //send SAD PATH to websocket
-  //       // socket.emit(
-  //       //   "binaryData",
-  //       //   dataToSendFoodAiManual,
-  //       //   (confirmation: Uint8Array) => {
-  //       //     console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
-  //       //   }
-  //       // )
-  //     }
-
-  //     img.src = imageUrl
-  //   } catch (error) {
-  //     console.error("Error handling upload:", error)
-  //   }
-  // }
+  console.log(aiData?.carbs)
 
   return (
     <Form {...form}>
@@ -471,7 +389,10 @@ export function FoodForm() {
                       <FormItem>
                         <FormLabel className="text-base">ชื่ออาหาร</FormLabel>
                         <FormControl className="text-base">
-                          <Input {...field} value={foodName} />
+                          <Input
+                            {...field}
+                            value={aiData?.foodName}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -487,7 +408,7 @@ export function FoodForm() {
                       <FormItem>
                         <FormLabel className="text-base">คาร์บ</FormLabel>
                         <FormControl className="text-base">
-                          <Input {...field} value={foodCarbs} />
+                          <Input {...field} value={aiData?.carbs || ""} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -513,10 +434,11 @@ export function FoodForm() {
               <h2 className="text-center mb-2 text-secondary">
                 กรุณาตรวจสอบความถูกต้อง
               </h2>
-              <p>ชื่ออาหาร: {mockDataFromAi.foodName}</p>
-              <p>คาร์บ: {mockDataFromAi.carbs + " (กรัม)"}</p>
+              <p>ชื่ออาหาร: {aiData?.foodName ? aiData.foodName : ""}</p>
+              <p>คาร์บ: {aiData?.carbs ? aiData.carbs + " (กรัม)" : ""}</p>
               <p className="mb-4">
-                ความมั่นใจผลประเมิน: {mockDataFromAi.foodCertainty * 100 + "%"}
+                ความมั่นใจผลประเมิน:{" "}
+                {aiData?.foodCertainty ? aiData.foodCertainty * 100 + "%" : ""}
               </p>
               <div className="flex flex-row gap-2">
                 <Button
