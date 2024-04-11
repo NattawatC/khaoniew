@@ -1,6 +1,6 @@
 "use client"
 
-import { Gumpun } from "@/components/Gumpun"
+// import { Gumpun } from "@/components/Gumpun"
 import { Navbar } from "@/components/Navbar"
 import { MainLayout } from "@/components/layout"
 import { NextPage } from "next"
@@ -61,7 +61,7 @@ const Review: NextPage = () => {
           <h1 className="flex justify-center text-3xl">
             {firstName} {lastName}
           </h1>
-          <Gumpun />
+          {/* <Gumpun /> */}
         </div>
 
         <div className="flex flex-col gap-4">

@@ -39,6 +39,13 @@ socket.on("connect", () => {
   console.log("Connected to SOCKET server")
 })
 
+interface AiProp {
+  carbs: number
+  foodName: string
+  foodCertainty: number
+  error: string[]
+}
+
 const formSchema = z.object({
   date: z.date(),
   mealTime: z.string(),
@@ -73,21 +80,30 @@ export function FoodForm() {
 
   const [showManualInput, setShowManualInput] = useState(false)
   const [manualFoodName, setManualFoodName] = useState("")
+  const [aiData, setAiData] = useState<AiProp>()
 
   //handle HAPPY Path
+  // useEffect(() => {
   const handleAuto = () => {
     // Set the food name and carbs when confirmed
     setFoodName(mockDataFromAi.foodName)
     setFoodCarbs(mockDataFromAi.carbs)
     setShowPopup(false) // Close the message box
     setShowFields(true) // Show the food name and carbs fields
-    socket.emit(
-      "binaryData",
-      dataToSendFoodAiAuto,
-      (confirmation: Uint8Array) => {
-        console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
-      }
-    )
+    // socket.emit(
+    //   "binaryData",
+    //   dataToSendFoodAiAuto,
+    //   (confirmation: Uint8Array) => {
+    //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+    //   }
+    // )
+    socket.off("fileChanged")
+    socket.on("fileChanged", ({ content }) => {
+      setAiData(content)
+      setShowPopup(true)
+      // console.log(`File ${path} has been changed. Content: ${content}`)
+      // Handle the received data as needed
+    })
   }
 
   //handle SAD Path
@@ -125,6 +141,7 @@ export function FoodForm() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values)
     // Do something with the form values.
     try {
       const response = await fetch(
@@ -236,16 +253,29 @@ export function FoodForm() {
         dataToSendFoodAiAutoInner.set(widthByteArray, offsetAuto)
         offsetAuto += widthByteArray.length
         dataToSendFoodAiAutoInner.set(uint8Array, offsetAuto)
-        setDataToSendFoodAiAuto(dataToSendFoodAiAutoInner)
+
+        socket.emit(
+          "binaryData",
+          dataToSendFoodAiAutoInner,
+          (confirmation: Uint8Array) => {
+            console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+          }
+        )
+
+        socket.off("fileChanged")
+        socket.on("fileChanged", ({ content }) => {
+          console.log({content})
+          setAiData(content)
+          setShowPopup(true)
+          // console.log(`File ${path} has been changed. Content: ${content}`)
+          // Handle the received data as needed
+        })
 
         console.log(
           "Final dataToSend for foodAiAuto:",
           dataToSendFoodAiAutoInner
         )
       }
-
-      setShowPopup(true)
-
       img.src = imageUrl
     } catch (error) {
       console.error("Error handling upload:", error)
@@ -471,7 +501,7 @@ export function FoodForm() {
                       <FormItem>
                         <FormLabel className="text-base">ชื่ออาหาร</FormLabel>
                         <FormControl className="text-base">
-                          <Input {...field} value={foodName} />
+                          <Input {...field} value={aiData?.foodName} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -487,7 +517,7 @@ export function FoodForm() {
                       <FormItem>
                         <FormLabel className="text-base">คาร์บ</FormLabel>
                         <FormControl className="text-base">
-                          <Input {...field} value={foodCarbs} />
+                          <Input {...field} value={aiData?.carbs} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -513,10 +543,11 @@ export function FoodForm() {
               <h2 className="text-center mb-2 text-secondary">
                 กรุณาตรวจสอบความถูกต้อง
               </h2>
-              <p>ชื่ออาหาร: {mockDataFromAi.foodName}</p>
-              <p>คาร์บ: {mockDataFromAi.carbs + " (กรัม)"}</p>
+              <p>ชื่ออาหาร: {aiData?.foodName ? aiData.foodName : ""}</p>
+              <p>คาร์บ: {aiData?.carbs ? aiData.carbs + " (กรัม)" : ""}</p>
               <p className="mb-4">
-                ความมั่นใจผลประเมิน: {mockDataFromAi.foodCertainty * 100 + "%"}
+                ความมั่นใจผลประเมิน:{" "}
+                {aiData?.foodCertainty ? aiData.foodCertainty * 100 + "%" : ""}
               </p>
               <div className="flex flex-row gap-2">
                 <Button
