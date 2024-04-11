@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BarChart } from "@tremor/react"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
-import { totalmem } from "os"
 import { useEffect, useState } from "react"
 import { FaPlus } from "react-icons/fa"
 
@@ -19,6 +18,7 @@ interface FoodData {
   mealTime: string
   food: {
     name: string
+    carbs: string
     score: string
   }
   feedback: {
@@ -37,6 +37,11 @@ interface PatientData {
   address: string
   phoneNumber: string
   healthRiskScore: number
+}
+
+interface MealsByDate {
+  date: string
+  mealScore: string
 }
 
 const data = [
@@ -81,6 +86,11 @@ const FoodLog: NextPage = () => {
   const [patient, setPatient] = useState<PatientData>({} as PatientData)
   const [foodData, setFoodData] = useState<FoodData[]>([])
   const patientId = localStorage.getItem("patientId")
+  const today = new Date().toLocaleDateString("th-TH")
+  const totalScore = foodData.reduce(
+    (acc, curr) => acc + parseInt(curr.food.score),
+    0
+  )
 
   useEffect(() => {
     fetch(`http://localhost:4263/patients/${patientId}`)
@@ -144,7 +154,64 @@ const FoodLog: NextPage = () => {
     fetchFoodData()
   }, [patientId])
 
-  const totalScore = foodData.reduce((acc, curr) => acc + parseInt(curr.food.score), 0)
+  // GraphData
+  //Daily
+  const dailyMeals = foodData
+    .filter((meal) => new Date(meal.date).toLocaleDateString("th-TH") === today)
+    .map((meal) => ({
+      date: new Date(meal.date).toLocaleDateString("th-TH"),
+      carbs: parseInt(meal.food.carbs),
+    }))
+
+  console.log(dailyMeals)
+
+  //Weekly
+  const currentDate = new Date()
+  const firstDayOfWeek = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    currentDate.getDate() - currentDate.getDay()
+  )
+  const lastDayOfWeek = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth(),
+    currentDate.getDate() - currentDate.getDay() + 6
+  )
+
+  const weeklyMeals = foodData
+    .filter((meal) => {
+      const mealDate = new Date(meal.date)
+      return mealDate >= firstDayOfWeek && mealDate <= lastDayOfWeek
+    })
+    .map((meal) => ({
+      date: new Date(meal.date).toLocaleDateString("th-TH"),
+      carbs: parseInt(meal.food.carbs),
+    }))
+
+  console.log(weeklyMeals)
+
+  //Monthly
+  const monthlyCarbsTotal: Record<string, number> = {}
+
+  foodData.forEach((meal) => {
+    const month = new Date(meal.date).getMonth() + 1
+    const carbs = parseInt(meal.food.carbs)
+
+    if (!monthlyCarbsTotal[month]) {
+      monthlyCarbsTotal[month] = 0
+    }
+
+    monthlyCarbsTotal[month] += carbs
+  })
+
+  const currentYear = new Date().getFullYear()
+
+  const monthlyCarbsArray = Object.entries(monthlyCarbsTotal).map(([month, carbs]) => ({
+    month: `${month.toString().padStart(2, '0')}/${currentYear}`,
+    carbs,
+  }));
+
+  console.log(monthlyCarbsArray)
 
   const goToAddFood = () => {
     router.push("/addFood")
@@ -152,7 +219,7 @@ const FoodLog: NextPage = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar username={patientId} />
       <MainLayout className="flex flex-col gap-8 bg-primary ">
         <Tabs defaultValue="บันทึกการบริโภค" className="flex flex-col w-auto">
           <TabsList className="w-full text-xl">
@@ -168,7 +235,7 @@ const FoodLog: NextPage = () => {
               <h1 className="flex justify-center text-3xl pt-8">
                 บันทึกการบริโภค
               </h1>
-              <Gumpun score={patient.healthRiskScore} totalScore={totalScore}/>
+              <Gumpun score={patient.healthRiskScore} totalScore={totalScore} />
             </div>
             <div className="flex flex-col gap-2">
               <p className="text-xl">รายการบริโภควันนี้</p>
@@ -227,18 +294,56 @@ const FoodLog: NextPage = () => {
                   </div>
                   <div className="px-5 bg-white rounded-md ">
                     <BarChart
-                      className="h-72 text-tremor-content-subtle borderRadius-tremor-default tremor-background-muted"
-                      data={data}
+                      className="h-72 text-tremor-content-subtle borderRadius-tremor-default tremor-background-muted borderRadius-tremor-full"
+                      data={dailyMeals}
                       index="date"
                       categories={["carbs"]}
                       colors={["#B12753"]}
-                      yAxisWidth={30}
+                      yAxisWidth={50}
                     />
                   </div>
                 </div>
               </TabsContent>
-              <TabsContent value="รายสัปดาห์">รายสัปดาห์</TabsContent>
-              <TabsContent value="รายเดือน">รายเดือน</TabsContent>
+              <TabsContent value="รายสัปดาห์">
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <h3 className="flex text-lg font-medium text-text justify-center">
+                      ปริมาณการบริโภคคาร์บ ต่อสัปดาห์
+                    </h3>
+                    <hr className="bg-text opacity-30 rounded h-1" />
+                  </div>
+                  <div className="px-5 bg-white rounded-md ">
+                    <BarChart
+                      className="h-72 text-tremor-content-subtle borderRadius-tremor-default tremor-background-muted"
+                      data={weeklyMeals}
+                      index="date"
+                      categories={["carbs"]}
+                      colors={["#B12753"]}
+                      yAxisWidth={50}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="รายเดือน">
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <h3 className="flex text-lg font-medium text-text justify-center">
+                      ปริมาณการบริโภคคาร์บ ต่อเดือน
+                    </h3>
+                    <hr className="bg-text opacity-30 rounded h-1" />
+                  </div>
+                  <div className="px-5 bg-white rounded-md ">
+                    <BarChart
+                      className="h-72 text-tremor-content-subtle borderRadius-tremor-default tremor-background-muted"
+                      data={monthlyCarbsArray}
+                      index="month"
+                      categories={["carbs"]}
+                      colors={["#B12753"]}
+                      yAxisWidth={50}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
             </Tabs>
           </TabsContent>
         </Tabs>
