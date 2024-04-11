@@ -22,6 +22,8 @@ import { NextPage } from "next"
 import Link from "next/link"
 import { useState } from "react"
 
+const thaiIdCheck = /^[0-9]{13}$/
+
 const formSchema = z.object({
   firstname: z.string(),
   lastname: z.string(),
@@ -31,7 +33,12 @@ const formSchema = z.object({
   phoneNumber: z.string(),
   medicalCondition: z.array(z.string()).optional(),
   healthRiskScore: z.enum(["0", "1", "2", "3"]),
-  thaiId: z.string(),
+  thaiId: z.string().refine((value) => thaiIdCheck.test(value), {
+    message: "กรุณาตรวจสอบหมายเลขและลองใหม่อีกครั้ง",
+    params: {
+      thaiIdCheck: thaiIdCheck.toString(),
+    },
+  }),
   password: z.string(),
 })
 
@@ -70,9 +77,9 @@ export function SignupForm() {
       thaiId: values.thaiId.replace(/-/g, ""),
       healthRiskScore: parseInt(values.healthRiskScore),
     }
-    
+
     console.log(cleanedValues)
-    
+
     try {
       const response = await fetch("http://localhost:4263/patients", {
         method: "POST",
