@@ -1,6 +1,6 @@
 "use client"
 
-import { Navbar } from "@/components/Navbar"
+// import { Navbar } from "@/components/Navbar"
 import { MainLayout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
 import { NextPage } from "next"
@@ -25,7 +25,7 @@ const result: NextPage = () => {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <MainLayout className="flex flex-col gap-4 bg-primary">
         <div className="flex flex-col gap-4">
           <h1 className="flex justify-center text-3xl">ผลการบันทึก</h1>
