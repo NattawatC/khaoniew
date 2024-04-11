@@ -66,7 +66,7 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
             <AlertDialogTrigger asChild>
               <Button
                 variant="outline"
-                className="border-secondary bg-transparent text-secondary p-2 w-full rounded-md hover:underline"
+                className="border-secondary bg-secondary text-white p-2 w-full rounded-md hover:underline"
               >
                 ลบ
               </Button>
@@ -101,9 +101,9 @@ const FoodCard: React.FunctionComponent<FoodCardProps> = ({
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <Button className="bg-secondary text-white p-2 w-full rounded-md">
+          {/* <Button className="bg-secondary text-white p-2 w-full rounded-md">
             แก้ไข
-          </Button>
+          </Button> */}
         </div>
       ) : null}
       <div className="flex flex-col gap-4">

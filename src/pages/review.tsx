@@ -1,3 +1,4 @@
+
 import Gumpun from "@/components/Gumpun"
 import { Navbar } from "@/components/Navbar"
 import ReviewCard from "@/components/ReviewCard"
