@@ -104,8 +104,8 @@ const Patient: NextPage = () => {
 
   return (
     <>
-      <Navbar username={staffName}/>
       <MainLayout className="flex flex-col gap-4 bg-primary">
+        <Navbar username={staffName} />
         <div className="flex flex-col gap-4">
           <h1 className="flex justify-center text-3xl">รายชื่อผู้ใช้</h1>
         </div>

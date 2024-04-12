@@ -206,10 +206,12 @@ const FoodLog: NextPage = () => {
 
   const currentYear = new Date().getFullYear()
 
-  const monthlyCarbsArray = Object.entries(monthlyCarbsTotal).map(([month, carbs]) => ({
-    month: `${month.toString().padStart(2, '0')}/${currentYear}`,
-    carbs,
-  }));
+  const monthlyCarbsArray = Object.entries(monthlyCarbsTotal).map(
+    ([month, carbs]) => ({
+      month: `${month.toString().padStart(2, "0")}/${currentYear}`,
+      carbs,
+    })
+  )
 
   console.log(monthlyCarbsArray)
 
@@ -219,8 +221,8 @@ const FoodLog: NextPage = () => {
 
   return (
     <>
-      <Navbar username={patientId} />
       <MainLayout className="flex flex-col gap-8 bg-primary ">
+        <Navbar username={patientId} />
         <Tabs defaultValue="บันทึกการบริโภค" className="flex flex-col w-auto">
           <TabsList className="w-full text-xl">
             <TabsTrigger className="text-xl text-text" value="บันทึกการบริโภค">
