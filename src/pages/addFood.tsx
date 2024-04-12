@@ -46,6 +46,12 @@ interface AiProp {
   error: string[]
 }
 
+const mockDataFromAi = {
+  carbs: 20.5,
+  foodName: "อาหาร",
+  foodCertainty: 0.643,
+}
+
 const formSchema = z.object({
   date: z.date(),
   mealTime: z.string(),
@@ -57,7 +63,18 @@ export function FoodForm() {
   const { setValue } = useForm()
   const router = useRouter()
   const [pixelArray, setPixelArray] = useState<number[][] | null>(null)
+  const [foodName, setFoodName] = useState<string>("")
+  const [foodCarbs, setFoodCarbs] = useState<string>("")
+  const [showFields, setShowFields] = useState(false)
+  const [foodNameValue, setFoodNameValue] = useState("")
+  const [dataToSendFoodAiAuto, setDataToSendFoodAiAuto] = useState<Uint8Array>(
+    new Uint8Array()
+  )
+  const [showManualInput, setShowManualInput] = useState(false)
+  const [manualFoodName, setManualFoodName] = useState("")
+  const [aiData, setAiData] = useState<AiProp | null>(null)
   const [showPopup, setShowPopup] = useState(false)
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const patientId =
     typeof window !== "undefined" ? localStorage.getItem("patientId") : null
   const form = useForm<z.infer<typeof formSchema>>({
@@ -69,126 +86,52 @@ export function FoodForm() {
     },
   })
 
-  console.log(patientId)
-
-  const [foodName, setFoodName] = useState<string>("")
-  const [foodCarbs, setFoodCarbs] = useState<string>("")
-  const [showFields, setShowFields] = useState(false)
-  const [foodNameValue, setFoodNameValue] = useState("")
-
-  const [dataToSendFoodAiAuto, setDataToSendFoodAiAuto] = useState<Uint8Array>(
-    new Uint8Array()
-  )
-
-  const [showManualInput, setShowManualInput] = useState(false)
-  const [manualFoodName, setManualFoodName] = useState("")
-  const [aiData, setAiData] = useState<AiProp | null>(null)
-
   //handle HAPPY Path
-  // useEffect(() => {
   const handleAuto = () => {
-    // Set the food name and carbs when confirmed
-    // setFoodName(mockDataFromAi.foodName)
-    // setFoodCarbs(mockDataFromAi.carbs)
-    setShowPopup(false) // Close the message box
-    setShowFields(true) // Show the food name and carbs fields
-    // socket.emit(
-    //   "binaryData",
-    //   dataToSendFoodAiAuto,
-    //   (confirmation: Uint8Array) => {
-    //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
-    //   }
-    // )
+    setShowPopup(false)
+    setShowFields(true)
     socket.off("fileChanged")
     socket.on("fileChanged", ({ content }) => {
       setAiData(content)
       setShowPopup(true)
-      // console.log(`File ${path} has been changed. Content: ${content}`)
-      // Handle the received data as needed
     })
   }
 
   //handle SAD Path
   const handleManual = () => {
-    // Set the food name and carbs when confirmed
-    // Create foodAiManual version
     setShowManualInput(false)
-    const foodAiManualHeader = new Uint8Array([1])
-    const foodNameByteArray = new TextEncoder().encode(manualFoodName || "")
-    const nameLengthByteArray = new Uint8Array([
-      (foodNameByteArray.length >> 8) & 0xff,
-      foodNameByteArray.length & 0xff,
-    ])
-    const dataToSendFoodAiManual = new Uint8Array(
-      foodAiManualHeader.length +
-        nameLengthByteArray.length +
-        foodNameByteArray.length
-    )
-    dataToSendFoodAiManual.set(foodAiManualHeader)
-    let offsetManual = foodAiManualHeader.length
-    dataToSendFoodAiManual.set(nameLengthByteArray, offsetManual)
-    offsetManual += nameLengthByteArray.length
-    dataToSendFoodAiManual.set(foodNameByteArray, offsetManual)
-    console.log("Final dataToSend for foodAiManual:", dataToSendFoodAiManual)
-    socket.emit(
-      "binaryData",
-      dataToSendFoodAiManual,
-      (confirmation: Uint8Array) => {
-        console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
-      }
-    )
+    // const foodAiManualHeader = new Uint8Array([1])
+    // const foodNameByteArray = new TextEncoder().encode(manualFoodName || "")
+    // const nameLengthByteArray = new Uint8Array([
+    //   (foodNameByteArray.length >> 8) & 0xff,
+    //   foodNameByteArray.length & 0xff,
+    // ])
+    // const dataToSendFoodAiManual = new Uint8Array(
+    //   foodAiManualHeader.length +
+    //     nameLengthByteArray.length +
+    //     foodNameByteArray.length
+    // )
+    // dataToSendFoodAiManual.set(foodAiManualHeader)
+    // let offsetManual = foodAiManualHeader.length
+    // dataToSendFoodAiManual.set(nameLengthByteArray, offsetManual)
+    // offsetManual += nameLengthByteArray.length
+    // dataToSendFoodAiManual.set(foodNameByteArray, offsetManual)
+    // console.log("Final dataToSend for foodAiManual:", dataToSendFoodAiManual)
+    // socket.emit(
+    //   "binaryData",
+    //   dataToSendFoodAiManual,
+    //   (confirmation: Uint8Array) => {
+    //     console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
+    //   }
+    // )
+    mockDataFromAi.carbs = 0
+    mockDataFromAi.foodName = manualFoodName
     setShowFields(true) // Show the food name and carbs fields
-  }
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    try {
-      const response = await fetch(
-        `http://localhost:4263/patients/${patientId}/meals`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...values,
-            name: aiData?.foodName || "", 
-            score: aiData?.carbs || "",
-          }),
-        }
-      )
-      if (!response.ok) {
-        throw new Error("Failed to create meal")
-      }
-      const resultData = await response.json()
-      router.push({
-        pathname: "/result",
-        query: { data: JSON.stringify(resultData), score: aiData?.carbs },
-      })
-    } catch (error) {
-      console.error("Error creating meal:", error)
-    }
-  }
-
-  function unSubmit() {
-    router.push("/foodLog")
-  }
-
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
-
-  const mockDataFromAi = {
-    carbs: 20.5,
-    foodName: "กะเพรา",
-    foodCertainty: 0.643,
-  }
-
-  const handleUploadWrapper = (files: File[]) => {
-    // Pass null as foodName because it's not available at the time of upload
-    handleUpload(files)
   }
 
   const handleUpload = async (files: File[]) => {
     try {
+      //converting image to pixel array
       const file = files[0]
       const imageUrl = URL.createObjectURL(file)
       setUploadedFiles([file])
@@ -219,6 +162,7 @@ export function FoodForm() {
         console.log("image details: ", files)
         console.log("Pixel Array before convert to Byte Array:", pixelArray)
         setPixelArray(pixelArray)
+        //convert image to bytearray
         const byteArray = pixelArray.flatMap((pixel) =>
           pixel.map((value) => value & 0xff)
         )
@@ -257,28 +201,28 @@ export function FoodForm() {
         offsetAuto += widthByteArray.length
         dataToSendFoodAiAutoInner.set(uint8Array, offsetAuto)
 
-        socket.emit(
-          "binaryData",
-          dataToSendFoodAiAutoInner,
-          (confirmation: Uint8Array) => {
-            console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
-          }
-        )
+        //sending image to AI
+        // socket.emit(
+        //   "binaryData",
+        //   dataToSendFoodAiAutoInner,
+        //   (confirmation: Uint8Array) => {
+        //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+        //   }
+        // )
 
-        socket.off("fileChanged")
-        socket.on("fileChanged", ({ content }) => {
-          console.log({ content })
-          setAiData(content)
-          setValue("name", aiData?.foodName || "");
-          setShowPopup(true)
-          // console.log(`File ${path} has been changed. Content: ${content}`)
-          // Handle the received data as needed
-        })
+        // socket.off("fileChanged")
+        // socket.on("fileChanged", ({ content }) => {
+        //   console.log({ content })
+        //   setAiData(content)
+        //   setValue("name", aiData?.foodName || "")
+        //   setShowPopup(true)
+        // })
 
-        console.log(
-          "Final dataToSend for foodAiAuto:",
-          dataToSendFoodAiAutoInner
-        )
+        // console.log(
+        //   "Final dataToSend for foodAiAuto:",
+        //   dataToSendFoodAiAutoInner
+        // )
+        setShowPopup(true)
       }
       img.src = imageUrl
     } catch (error) {
@@ -286,7 +230,39 @@ export function FoodForm() {
     }
   }
 
-  console.log(aiData?.carbs)
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    // Do something with the form values.
+    try {
+      const response = await fetch(
+        `http://localhost:4263/patients/${patientId}/meals`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...values,
+            name: aiData?.foodName || "",
+            score: aiData?.carbs || "",
+          }),
+        }
+      )
+      if (!response.ok) {
+        throw new Error("Failed to create meal")
+      }
+      const resultData = await response.json()
+      router.push({
+        pathname: "/result",
+        query: { data: JSON.stringify(resultData), score: aiData?.carbs },
+      })
+    } catch (error) {
+      console.error("Error creating meal:", error)
+    }
+  }
+
+  function unSubmit() {
+    router.push("/foodLog")
+  }
 
   return (
     <Form {...form}>
@@ -389,10 +365,8 @@ export function FoodForm() {
                       <FormItem>
                         <FormLabel className="text-base">ชื่ออาหาร</FormLabel>
                         <FormControl className="text-base">
-                          <Input
-                            {...field}
-                            value={aiData?.foodName}
-                          />
+                          {/* <Input {...field} value={aiData?.foodName} /> */}
+                          <Input {...field} value={mockDataFromAi.foodName} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -408,7 +382,8 @@ export function FoodForm() {
                       <FormItem>
                         <FormLabel className="text-base">คาร์บ</FormLabel>
                         <FormControl className="text-base">
-                          <Input {...field} value={aiData?.carbs || ""} />
+                          {/* <Input {...field} value={aiData?.carbs || ""} /> */}
+                          <Input {...field} value={mockDataFromAi.carbs} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -418,78 +393,132 @@ export function FoodForm() {
               </>
             )}
           </div>
-          <ImageUploader onUpload={handleUploadWrapper} />
+          <ImageUploader onUpload={handleUpload} />
           {uploadedFiles && uploadedFiles.length > 0 && (
             <div>
-              <h2>ไฟล์ของคุณ:</h2>
+              <h2>ภาพอาหารของคุณ:</h2>
               <ul>
                 {uploadedFiles.map((fileData, index) => (
-                  <li key={index}>{fileData.name}</li>
+                  <li key={index}>
+                    {fileData.name}
+                    <img
+                      className="mt-4"
+                      src={URL.createObjectURL(fileData)}
+                      alt={fileData.name}
+                    />
+                  </li>
                 ))}
               </ul>
             </div>
           )}
           {showPopup && (
-            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 shadow-lg rounded-md p-6 z-10">
-              <h2 className="text-center mb-2 text-secondary">
-                กรุณาตรวจสอบความถูกต้อง
-              </h2>
-              <p>ชื่ออาหาร: {aiData?.foodName ? aiData.foodName : ""}</p>
-              <p>คาร์บ: {aiData?.carbs ? aiData.carbs + " (กรัม)" : ""}</p>
-              <p className="mb-4">
-                ความมั่นใจผลประเมิน:{" "}
-                {aiData?.foodCertainty ? aiData.foodCertainty * 100 + "%" : ""}
-              </p>
-              <div className="flex flex-row gap-2">
-                <Button
-                  variant={"outline"}
-                  className="bg-secondary text-white w-full text-base rounded-md"
-                  onClick={() => handleAuto()}
-                >
-                  ยืนยัน
-                </Button>
-                <Button
-                  variant={"outline"}
-                  className="border-secondary text-secondary w-full text-base rounded-md"
-                  onClick={() => {
-                    setShowPopup(false)
-                    setShowManualInput(true)
-                  }}
-                >
-                  ยกเลิก
-                </Button>
+            <div className="fixed inset-0">
+              <div className="absolute inset-0 bg-white opacity-70 blur-lg"></div>
+              <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 shadow-lg rounded-md p-6 z-10">
+                <h2 className="text-center mb-2 text-secondary">
+                  กรุณาตรวจสอบชื่ออาหาร
+                </h2>
+                {/* <ol>
+                <li>ชื่ออาหาร: {aiData?.foodName ? aiData.foodName : ""}</li>
+                <li>คาร์บ: {aiData?.carbs ? aiData.carbs + " (กรัม)" : ""}</li>
+                <li className="mb-4">
+                  ความมั่นใจผลประเมิน:{" "}
+                  {aiData?.foodCertainty
+                    ? aiData.foodCertainty * 100 + "%"
+                    : ""}{" "}
+                </li>
+                </ol> */}
+                <ol>
+                  <li>
+                    {"1. "}ชื่ออาหาร: {mockDataFromAi.foodName}
+                  </li>
+                  <li>
+                    {"2. "}คาร์บ: {mockDataFromAi.carbs + " (กรัม)"}
+                  </li>
+                  <li className="mb-4">
+                    {"3. "}ความมั่นใจผลประเมิน:{" "}
+                    {mockDataFromAi.foodCertainty * 100 + "%"}
+                  </li>
+                </ol>
+                <div className="flex flex-row gap-2">
+                  <Button
+                    variant={"outline"}
+                    className="bg-secondary text-white w-full text-base rounded-md"
+                    onClick={() => handleAuto()}
+                  >
+                    ยืนยัน
+                  </Button>
+                  <Button
+                    variant={"outline"}
+                    className="border-secondary text-secondary w-full text-base rounded-md"
+                    onClick={() => {
+                      setShowPopup(false)
+                      setShowManualInput(true)
+                    }}
+                  >
+                    ยกเลิก
+                  </Button>
+                </div>
               </div>
             </div>
           )}
           {showManualInput && (
-            <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 shadow-lg rounded-md p-6 z-10">
-              <div className="flex flex-row gap-2 mt-4">
-                <div>
-                  <label htmlFor="manualFoodName">Enter Food Name:</label>
-                  <input
-                    type="text"
-                    id="manualFoodName"
-                    value={manualFoodName}
-                    onChange={(e) => setManualFoodName(e.target.value)}
-                  />
+            <div className="fixed inset-0">
+              <div className="absolute inset-0 bg-white opacity-70 blur-lg"></div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 justify-between rounded-md border border-input bg-white px-3 py-2 z-10">
+                <div className="flex flex-col gap-2 mt-4">
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="manualFoodName">
+                      กรุณาระบุชื่ออาหารที่ถูกต้อง
+                    </label>
+                    <input
+                      className="border border-input rounded-md px-3 py-2"
+                      type="text"
+                      id="manualFoodName"
+                      value={manualFoodName}
+                      onChange={(e) => setManualFoodName(e.target.value)}
+                    />
+                    {uploadedFiles.map((fileData, index) => (
+                      <div key={index}>
+                        <img
+                          className="mt-2"
+                          src={URL.createObjectURL(fileData)}
+                          alt={fileData.name}
+                        />
+                      </div>
+                    ))}
+                    <ol>
+                      <li>
+                        {"1. "}
+                        จำนวนกำปั้นจะถูกประเมินโดยผู้เชี่ยวชาญในภายหลัง{" "}
+                      </li>
+                      <li>
+                        {"2. "}
+                        กรุฌาให้ความสนใจกับจำนวนกำปั้นที่เหลือในมื้อถัดไป{" "}
+                      </li>
+                    </ol>
+                  </div>
+                  <div className="flex flex-row gap-2 mt-4">
+                    <Button
+                      variant={"outline"}
+                      className="bg-secondary text-white w-full text-base rounded-md"
+                      onClick={() => handleManual()}
+                    >
+                      ยืนยัน
+                    </Button>
+                    <Button
+                      variant={"outline"}
+                      className="border-secondary text-secondary w-full text-base rounded-md"
+                      onClick={() => setShowManualInput(false)}
+                    >
+                      ยกเลิก
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  variant={"outline"}
-                  className="bg-secondary text-white w-full text-base rounded-md"
-                  onClick={() => handleManual()}
-                >
-                  ยืนยัน
-                </Button>
-                <Button
-                  variant={"outline"}
-                  className="border-secondary text-secondary w-full text-base rounded-md"
-                  onClick={() => setShowManualInput(false)}
-                >
-                  ยกเลิก
-                </Button>
               </div>
             </div>
           )}
+
           <div className="flex flex-col gap-2 ">
             <Button
               className="bg-secondary text-white w-full text-base rounded-md"
