@@ -231,7 +231,33 @@ export function FoodForm() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
+    // try {
+    //   const response = await fetch(
+    //     `http://localhost:4263/patients/${patientId}/meals`,
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         "Content-Type": "application/json",
+    //       },
+    //       body: JSON.stringify({
+    //         ...values,
+    //         name: aiData?.foodName || "",
+    //         score: aiData?.carbs || "",
+    //       }),
+    //     }
+    //   )
+    //   if (!response.ok) {
+    //     throw new Error("Failed to create meal")
+    //   }
+    //   const resultData = await response.json()
+    //   router.push({
+    //     pathname: "/result",
+    //     query: { data: JSON.stringify(resultData), score: aiData?.carbs },
+    //   })
+    // } catch (error) {
+    //   console.error("Error creating meal:", error)
+    // }
+
     try {
       const response = await fetch(
         `http://localhost:4263/patients/${patientId}/meals`,
@@ -242,8 +268,8 @@ export function FoodForm() {
           },
           body: JSON.stringify({
             ...values,
-            name: aiData?.foodName || "",
-            score: aiData?.carbs || "",
+            name: mockDataFromAi.foodName,
+            score: mockDataFromAi.carbs,
           }),
         }
       )
@@ -253,7 +279,10 @@ export function FoodForm() {
       const resultData = await response.json()
       router.push({
         pathname: "/result",
-        query: { data: JSON.stringify(resultData), score: aiData?.carbs },
+        query: {
+          data: JSON.stringify(resultData),
+          score: mockDataFromAi.carbs,
+        },
       })
     } catch (error) {
       console.error("Error creating meal:", error)
