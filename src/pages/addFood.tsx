@@ -47,8 +47,8 @@ interface AiProp {
 }
 
 const mockDataFromAi = {
-  carbs: 20.5,
-  foodName: "อาหาร",
+  carbs: 13.2,
+  foodName: "แสนอร่อย",
   foodCertainty: 0.643,
 }
 

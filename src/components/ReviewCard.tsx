@@ -20,7 +20,7 @@ interface FoodCardProps {
   mealId: number
   meal: string
   foodName: string
-  carbs: string
+  score: string
   review: string
   reviewBy: string
   updateReviewCallback: () => void
@@ -32,14 +32,15 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
   mealId,
   meal,
   foodName,
-  carbs,
+  score,
   review,
   reviewBy,
   updateReviewCallback,
 }) => {
   const [reviewText, setReviewText] = useState("")
-  const [gumpunText, setGumpunText] = useState("")
-  const staffName = localStorage.getItem("staffName")
+  const [gumpunText, setGumpunText] = useState(score)
+  const staffName =
+    typeof window !== "undefined" ? localStorage.getItem("staffName") : null
   const formattedDate = new Date(date).toLocaleDateString("th-TH", {
     day: "2-digit",
     month: "2-digit",
@@ -49,6 +50,7 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
   function submitReview() {
     const updateData = {
       review: reviewText,
+      score: gumpunText,
       reviewBy: staffName,
     }
 
@@ -72,6 +74,8 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
       .catch((error) => {
         console.error("Error updating review:", error)
       })
+
+    console.log(updateData)
   }
 
   return (
@@ -91,7 +95,7 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
           </p>
           <div className="flex flex-row items-center gap-2">
             <p className="font-bold">
-              คาร์โบไฮเดรต : <span className="font-normal">{carbs}</span>
+              คาร์โบไฮเดรต : <span className="font-normal">{score}</span>
             </p>
             <FaFistRaised size={20} />
           </div>
@@ -137,8 +141,8 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
                 <Textarea
                   className="text-base text-text"
                   placeholder="เปลี่ยนจำนวนกำปั้น..."
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
+                  value={gumpunText}
+                  onChange={(e) => setGumpunText(e.target.value)}
                 />
               </AlertDialogDescription>
               <p className="font-bold">

@@ -1,5 +1,4 @@
 import Gumpun from "@/components/Gumpun"
-import { Navbar } from "@/components/Navbar"
 import ReviewCard from "@/components/ReviewCard"
 import { MainLayout } from "@/components/layout"
 import { Button } from "@/components/ui/button"
@@ -16,6 +15,7 @@ interface FoodData {
     score: string
   }
   feedback: {
+    score: string
     review: string
     reviewBy: string
   }
@@ -82,7 +82,7 @@ const Review: NextPage = () => {
               date={foodItem.date}
               meal={foodItem.mealTime}
               foodName={foodItem.food.name}
-              carbs={foodItem.food.score}
+              score={foodItem.food.score}
               review={foodItem.feedback.review}
               reviewBy={foodItem.feedback.reviewBy}
               updateReviewCallback={updateReviewCallback}
