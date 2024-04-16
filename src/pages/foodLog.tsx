@@ -85,7 +85,8 @@ const FoodLog: NextPage = () => {
   const [showComparison, setShowComparison] = useState(false)
   const [patient, setPatient] = useState<PatientData>({} as PatientData)
   const [foodData, setFoodData] = useState<FoodData[]>([])
-  const patientId = localStorage.getItem("patientId")
+  const patientId =
+    typeof window !== "undefined" ? localStorage.getItem("patientId") : null
   const today = new Date().toLocaleDateString("th-TH")
   const totalScore = foodData.reduce(
     (acc, curr) => acc + parseInt(curr.food.score),

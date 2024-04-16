@@ -33,12 +33,13 @@ const formSchema = z.object({
   phoneNumber: z.string(),
   medicalCondition: z.array(z.string()).optional(),
   healthRiskScore: z.enum(["0", "1", "2", "3"]),
-  thaiId: z.string().refine((value) => thaiIdCheck.test(value), {
-    message: "กรุณาตรวจสอบหมายเลขและลองใหม่อีกครั้ง",
-    params: {
-      thaiIdCheck: thaiIdCheck.toString(),
-    },
-  }),
+  // thaiId: z.string().refine((value) => thaiIdCheck.test(value), {
+  //   message: "กรุณาตรวจสอบหมายเลขและลองใหม่อีกครั้ง",
+  //   params: {
+  //     thaiIdCheck: thaiIdCheck.toString(),
+  //   },
+  // }),
+  thaiId: z.string(),
   password: z.string(),
 })
 
