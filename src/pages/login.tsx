@@ -22,9 +22,10 @@ import { NextPage } from "next"
 import Link from "next/link"
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  // username: z.string().min(2, {
+  //   message: "Username must be at least 2 characters.",
+  // }),
+  username: z.string(),
   password: z.string(),
 })
 
@@ -37,7 +38,7 @@ export function LoginForm() {
       password: "",
     },
   })
-  
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const response = await fetch("http://localhost:4263/auth", {
@@ -49,7 +50,6 @@ export function LoginForm() {
           username: values.username,
           password: values.password,
         }),
-
       })
       if (!response.ok) {
         throw new Error("Login failed")
@@ -59,9 +59,8 @@ export function LoginForm() {
       if (data.userType == "staff") {
         localStorage.setItem("staffName", data.user.fullName)
         router.push("/patient")
-      }
-      else{
-        localStorage.setItem("patientId", data.user.thaiId);
+      } else {
+        localStorage.setItem("patientId", data.user.thaiId)
         router.push("/foodLog")
       }
     } catch (error) {
