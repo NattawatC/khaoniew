@@ -284,6 +284,8 @@ export function FoodForm() {
           score: mockDataFromAi.carbs,
         },
       })
+      console.log("resultData", resultData)
+      console.log("mockData Carbs:", mockDataFromAi.carbs)
     } catch (error) {
       console.error("Error creating meal:", error)
     }

@@ -23,7 +23,7 @@ interface FoodCardProps {
   carbs: string
   review: string
   reviewBy: string
-  updateReviewCallback: () => void;
+  updateReviewCallback: () => void
 }
 
 const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
@@ -35,9 +35,10 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
   carbs,
   review,
   reviewBy,
-  updateReviewCallback
+  updateReviewCallback,
 }) => {
   const [reviewText, setReviewText] = useState("")
+  const [gumpunText, setGumpunText] = useState("")
   const staffName = localStorage.getItem("staffName")
   const formattedDate = new Date(date).toLocaleDateString("th-TH", {
     day: "2-digit",
@@ -133,9 +134,15 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
                   value={reviewText}
                   onChange={(e) => setReviewText(e.target.value)}
                 />
+                <Textarea
+                  className="text-base text-text"
+                  placeholder="เปลี่ยนจำนวนกำปั้น..."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                />
               </AlertDialogDescription>
               <p className="font-bold">
-                โดย: <span className="font-normal">{staffName}</span>
+                โดย: <span className="font-normal">Dr. {staffName}</span>
               </p>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row items-center gap-2">
