@@ -95,6 +95,7 @@ export function FoodForm() {
       setAiData(content)
       setShowPopup(true)
     })
+    console.log("image details: ", uploadedFiles)
   }
 
   //handle SAD Path
@@ -288,6 +289,31 @@ export function FoodForm() {
       console.log("mockData Carbs:", mockDataFromAi.carbs)
     } catch (error) {
       console.error("Error creating meal:", error)
+    }
+    imageToDb(uploadedFiles)
+  }
+
+  const imageToDb = async (files: File[]) => {
+    const formData = new FormData()
+    files.forEach((file, index) => {
+      formData.append(`image`, file)
+    })
+    try {
+      const response = await fetch("http://localhost:4263/images/upload", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image")
+      }
+
+      const responseData = await response.json()
+      console.log("Image uploaded successfully:", responseData)
+      return responseData
+    } catch (error: any) {
+      console.error("Error uploading image:", error.message)
+      throw error
     }
   }
 
