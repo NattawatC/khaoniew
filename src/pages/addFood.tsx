@@ -276,7 +276,6 @@ export function FoodForm() {
           }),
         }
       )
-      console.log("Meal Created Successfully")
       if (!response.ok) {
         throw new Error("Failed to create meal")
       }
