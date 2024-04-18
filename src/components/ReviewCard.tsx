@@ -23,6 +23,7 @@ interface FoodCardProps {
   score: string
   review: string
   reviewBy: string
+  imageId: number
   updateReviewCallback: () => void
 }
 
@@ -35,10 +36,12 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
   score,
   review,
   reviewBy,
+  imageId,
   updateReviewCallback,
 }) => {
   const [reviewText, setReviewText] = useState("")
   const [gumpunText, setGumpunText] = useState(score)
+  const [imageDataUrl, setImageDataUrl] = useState<Blob | null>(null)
   const staffName =
     typeof window !== "undefined" ? localStorage.getItem("staffName") : null
   const formattedDate = new Date(date).toLocaleDateString("th-TH", {
@@ -46,6 +49,122 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
     month: "2-digit",
     year: "numeric",
   })
+
+  // useEffect(() => {
+  //   const fetchImage = async () => {
+  //     try {
+  //       const imageData = await fetchImageById(imageId)
+  //       const imageUrl = URL.createObjectURL(imageData)
+  //       console.log("imageId:", imageId)
+  //       console.log("Image URL:", imageUrl) // Log image URL
+  //       setImageDataUrl(imageUrl)
+  //     } catch (error) {
+  //       console.error("Error fetching image:", error)
+  //     }
+  //   }
+
+  //   if (imageId) {
+  //     fetchImage()
+  //   }
+  // }, [imageId])
+
+  async function fetchImageById(id: any): Promise<any> {
+    try {
+      const response = await fetch(`http://localhost:4263/images/${id}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch image")
+      }
+      const imageData = await response.blob()
+      console.log("fetch by id's imageData", imageData)
+      return imageData
+    } catch (error) {
+      console.error("Error fetching image:", error)
+      throw error
+    }
+  }
+
+  // async function doSome() {
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:4263/patients/${patientId}/meals`
+  //     )
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch food data")
+  //     }
+  //     const mealData = await response.json()
+  //     let foundId = null
+  //     for (const key in mealData) {
+  //       if (Object.prototype.hasOwnProperty.call(mealData, key)) {
+  //         const item = mealData[key]
+  //         if (item.hasOwnProperty("id")) {
+  //           foundId = item.id
+  //           break // Once we find the id, no need to continue searching
+  //         }
+  //       }
+  //     }
+  //     if (foundId !== null) {
+  //       console.log("Found id:", foundId)
+
+  //       // Now fetch the image by id
+  //       const imageData = await fetchImageById(foundId)
+  //       // const imageUrl = URL.createObjectURL(imageData)
+  //       setImageDataUrl(imageData)
+  //       console.log("imageData:", imageData)
+  //       console.log("ImageDataURL:", imageDataUrl)
+
+  //       // Now you can use imageUrl to display the image
+  //     } else {
+  //       console.log("No id found in mealData")
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching meals data:", error)
+  //   }
+  // }
+
+  async function doSome() {
+    try {
+      const response = await fetch(
+        `http://localhost:4263/patients/${patientId}/meals`
+      )
+      if (!response.ok) {
+        throw new Error("Failed to fetch food data")
+      }
+      const mealData = await response.json()
+      let foundId = null
+      for (const key in mealData) {
+        if (Object.prototype.hasOwnProperty.call(mealData, key)) {
+          const item = mealData[key]
+          if (item.hasOwnProperty("id")) {
+            foundId = item.id
+            break // Once we find the id, no need to continue searching
+          }
+        }
+      }
+      if (foundId !== null) {
+        console.log("Found id:", foundId)
+
+        // Now fetch the image by id
+        const imageData = await fetchImageById(foundId)
+        const imageUrl = URL.createObjectURL(imageData)
+        setImageDataUrl(imageData)
+        console.log("Blob URL:", imageUrl)
+
+        const img = new Image()
+        img.src = imageUrl
+        img.onload = () => {
+          document.body.appendChild(img)
+        }
+
+        console.log("img:", img)
+
+        // Now you can use imageUrl to display the image
+      } else {
+        console.log("No id found in mealData")
+      }
+    } catch (error) {
+      console.error("Error fetching meals data:", error)
+    }
+  }
 
   function submitReview() {
     const updateData = {
@@ -122,7 +241,10 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
         </p>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button className="bg-secondary text-white p-2 w-full rounded-md">
+            <Button
+              className="bg-secondary text-white p-2 w-full rounded-md"
+              onClick={doSome}
+            >
               ความคิดเห็นจากผู้เชี่ยวชาญ
             </Button>
           </AlertDialogTrigger>
@@ -144,6 +266,14 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
                   value={gumpunText}
                   onChange={(e) => setGumpunText(e.target.value)}
                 />
+                {imageDataUrl && (
+                  <img
+                    src={URL.createObjectURL(imageDataUrl)}
+                    // src={imageDataUrl}
+                    alt="Food"
+                    className="max-w-full h-auto"
+                  />
+                )}
               </AlertDialogDescription>
               <p className="font-bold">
                 โดย: <span className="font-normal">Dr. {staffName}</span>

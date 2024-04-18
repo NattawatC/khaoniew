@@ -10,6 +10,7 @@ interface FoodData {
   id: number
   date: string
   mealTime: string
+  imageId: number
   food: {
     name: string
     score: string
@@ -53,6 +54,7 @@ const Review: NextPage = () => {
       }
       const data = await response.json()
       setFoodData(data)
+      console.log("review foodData", foodData)
     } catch (error) {
       console.error("Error fetching food data:", error)
     }
@@ -82,6 +84,7 @@ const Review: NextPage = () => {
               date={foodItem.date}
               meal={foodItem.mealTime}
               foodName={foodItem.food.name}
+              imageId={foodItem.imageId}
               score={foodItem.food.score}
               review={foodItem.feedback.review}
               reviewBy={foodItem.feedback.reviewBy}

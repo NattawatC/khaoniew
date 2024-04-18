@@ -259,6 +259,7 @@ export function FoodForm() {
     //   console.error("Error creating meal:", error)
     // }
 
+    const imageId = await imageToDb(uploadedFiles)
     try {
       const response = await fetch(
         `http://localhost:4263/patients/${patientId}/meals`,
@@ -271,9 +272,11 @@ export function FoodForm() {
             ...values,
             name: mockDataFromAi.foodName,
             score: mockDataFromAi.carbs,
+            id: imageId.id,
           }),
         }
       )
+      console.log("Meal Created Successfully")
       if (!response.ok) {
         throw new Error("Failed to create meal")
       }
@@ -290,12 +293,11 @@ export function FoodForm() {
     } catch (error) {
       console.error("Error creating meal:", error)
     }
-    imageToDb(uploadedFiles)
   }
 
   const imageToDb = async (files: File[]) => {
     const formData = new FormData()
-    files.forEach((file, index) => {
+    files.forEach((file) => {
       formData.append(`image`, file)
     })
     try {
