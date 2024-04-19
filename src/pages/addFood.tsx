@@ -47,8 +47,8 @@ interface AiProp {
 }
 
 const mockDataFromAi = {
-  carbs: 13.2,
-  foodName: "แสนอร่อย",
+  carbs: 48.6,
+  foodName: "MhooTordKratiem",
   foodCertainty: 0.643,
 }
 
@@ -125,8 +125,18 @@ export function FoodForm() {
     //     console.log("Image Sent to AI (Manual):", confirmation) // Server's acknowledgment
     //   }
     // )
+
+    ////////////////////////
+
     mockDataFromAi.carbs = 0
     mockDataFromAi.foodName = manualFoodName
+
+    ///////////////////////
+
+    // aiData!.carbs = "0"
+    // aiData!.foodName = manualFoodName
+    // console.log("aiData:", aiData)
+
     setShowFields(true) // Show the food name and carbs fields
   }
 
@@ -232,6 +242,7 @@ export function FoodForm() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    const imageId = await imageToDb(uploadedFiles)
     // try {
     //   const response = await fetch(
     //     `http://localhost:4263/patients/${patientId}/meals`,
@@ -259,7 +270,6 @@ export function FoodForm() {
     //   console.error("Error creating meal:", error)
     // }
 
-    const imageId = await imageToDb(uploadedFiles)
     try {
       const response = await fetch(
         `http://localhost:4263/patients/${patientId}/meals`,
@@ -477,14 +487,16 @@ export function FoodForm() {
                   กรุณาตรวจสอบชื่ออาหาร
                 </h2>
                 {/* <ol>
-                <li>ชื่ออาหาร: {aiData?.foodName ? aiData.foodName : ""}</li>
-                <li>คาร์บ: {aiData?.carbs ? aiData.carbs + " (กรัม)" : ""}</li>
-                <li className="mb-4">
-                  ความมั่นใจผลประเมิน:{" "}
-                  {aiData?.foodCertainty
-                    ? aiData.foodCertainty * 100 + "%"
-                    : ""}{" "}
-                </li>
+                  <li>ชื่ออาหาร: {aiData?.foodName ? aiData.foodName : ""}</li>
+                  <li>
+                    คาร์บ: {aiData?.carbs ? aiData.carbs + " (กรัม)" : ""}
+                  </li>
+                  <li className="mb-4">
+                    ความมั่นใจผลประเมิน:{" "}
+                    {aiData?.foodCertainty
+                      ? aiData.foodCertainty * 100 + "%"
+                      : ""}{" "}
+                  </li>
                 </ol> */}
                 <ol>
                   <li>
