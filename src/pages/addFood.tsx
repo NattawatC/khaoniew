@@ -72,7 +72,12 @@ export function FoodForm() {
   )
   const [showManualInput, setShowManualInput] = useState(false)
   const [manualFoodName, setManualFoodName] = useState("")
-  const [aiData, setAiData] = useState<AiProp | null>(null)
+  const [aiData, setAiData] = useState<AiProp>({
+    carbs: "0",
+    foodName: "unfound",
+    foodCertainty: 0,
+    error: [],
+  })
   const [showPopup, setShowPopup] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const patientId =
@@ -128,14 +133,14 @@ export function FoodForm() {
 
     ////////////////////////
 
-    mockDataFromAi.carbs = 0
-    mockDataFromAi.foodName = manualFoodName
+    // mockDataFromAi.carbs = 0
+    // mockDataFromAi.foodName = manualFoodName
 
     ///////////////////////
-
-    // aiData!.carbs = "0"
-    // aiData!.foodName = manualFoodName
-    // console.log("aiData:", aiData)
+    console.log("aiData:", aiData)
+    aiData!.carbs = "0"
+    aiData!.foodName = manualFoodName
+    console.log("aiData:", aiData)
 
     setShowFields(true) // Show the food name and carbs fields
   }
@@ -212,27 +217,27 @@ export function FoodForm() {
         offsetAuto += widthByteArray.length
         dataToSendFoodAiAutoInner.set(uint8Array, offsetAuto)
 
-        //sending image to AI
-        // socket.emit(
-        //   "binaryData",
-        //   dataToSendFoodAiAutoInner,
-        //   (confirmation: Uint8Array) => {
-        //     console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
-        //   }
-        // )
+        // sending image to AI
+        socket.emit(
+          "binaryData",
+          dataToSendFoodAiAutoInner,
+          (confirmation: Uint8Array) => {
+            console.log("Image Sent to AI (Auto):", confirmation) // Server's acknowledgment
+          }
+        )
 
-        // socket.off("fileChanged")
-        // socket.on("fileChanged", ({ content }) => {
-        //   console.log({ content })
-        //   setAiData(content)
-        //   setValue("name", aiData?.foodName || "")
-        //   setShowPopup(true)
-        // })
+        socket.off("fileChanged")
+        socket.on("fileChanged", ({ content }) => {
+          console.log({ content })
+          setAiData(content)
+          setValue("name", aiData?.foodName || "")
+          setShowPopup(true)
+        })
 
-        // console.log(
-        //   "Final dataToSend for foodAiAuto:",
-        //   dataToSendFoodAiAutoInner
-        // )
+        console.log(
+          "Final dataToSend for foodAiAuto:",
+          dataToSendFoodAiAutoInner
+        )
         setShowPopup(true)
       }
       img.src = imageUrl
@@ -242,7 +247,35 @@ export function FoodForm() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const imageId = await imageToDb(uploadedFiles)
+    // const imageId = await imageToDb(uploadedFiles)
+    console.log("onSubmit aiData", aiData)
+    try {
+      const mergedValues = {
+        ...values,
+        name: aiData?.foodName || "",
+        score: aiData?.carbs || "",
+      }
+      const response = await fetch(
+        `http://localhost:4263/patients/${patientId}/meals`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(mergedValues),
+        }
+      )
+      if (!response.ok) {
+        throw new Error("Failed to create meal")
+      }
+      const resultData = await response.json()
+      router.push({
+        pathname: "/result",
+        query: { data: JSON.stringify(resultData), score: aiData?.carbs },
+      })
+    } catch (error) {
+      console.error("Error creating meal:", error)
+    }
     // try {
     //   const response = await fetch(
     //     `http://localhost:4263/patients/${patientId}/meals`,
@@ -253,8 +286,9 @@ export function FoodForm() {
     //       },
     //       body: JSON.stringify({
     //         ...values,
-    //         name: aiData?.foodName || "",
-    //         score: aiData?.carbs || "",
+    //         name: mockDataFromAi.foodName,
+    //         score: mockDataFromAi.carbs,
+    //         id: imageId.id,
     //       }),
     //     }
     //   )
@@ -264,44 +298,16 @@ export function FoodForm() {
     //   const resultData = await response.json()
     //   router.push({
     //     pathname: "/result",
-    //     query: { data: JSON.stringify(resultData), score: aiData?.carbs },
+    //     query: {
+    //       data: JSON.stringify(resultData),
+    //       score: mockDataFromAi.carbs,
+    //     },
     //   })
+    //   console.log("resultData", resultData)
+    //   console.log("mockData Carbs:", mockDataFromAi.carbs)
     // } catch (error) {
     //   console.error("Error creating meal:", error)
     // }
-
-    try {
-      const response = await fetch(
-        `http://localhost:4263/patients/${patientId}/meals`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...values,
-            name: mockDataFromAi.foodName,
-            score: mockDataFromAi.carbs,
-            id: imageId.id,
-          }),
-        }
-      )
-      if (!response.ok) {
-        throw new Error("Failed to create meal")
-      }
-      const resultData = await response.json()
-      router.push({
-        pathname: "/result",
-        query: {
-          data: JSON.stringify(resultData),
-          score: mockDataFromAi.carbs,
-        },
-      })
-      console.log("resultData", resultData)
-      console.log("mockData Carbs:", mockDataFromAi.carbs)
-    } catch (error) {
-      console.error("Error creating meal:", error)
-    }
   }
 
   const imageToDb = async (files: File[]) => {
@@ -433,8 +439,8 @@ export function FoodForm() {
                       <FormItem>
                         <FormLabel className="text-base">ชื่ออาหาร</FormLabel>
                         <FormControl className="text-base">
-                          {/* <Input {...field} value={aiData?.foodName} /> */}
-                          <Input {...field} value={mockDataFromAi.foodName} />
+                          <Input {...field} value={aiData?.foodName} />
+                          {/* <Input {...field} value={mockDataFromAi.foodName} /> */}
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -450,8 +456,8 @@ export function FoodForm() {
                       <FormItem>
                         <FormLabel className="text-base">คาร์บ</FormLabel>
                         <FormControl className="text-base">
-                          {/* <Input {...field} value={aiData?.carbs || ""} /> */}
-                          <Input {...field} value={mockDataFromAi.carbs} />
+                          <Input {...field} value={aiData?.carbs || ""} />
+                          {/* <Input {...field} value={mockDataFromAi.carbs} /> */}
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -486,7 +492,7 @@ export function FoodForm() {
                 <h2 className="text-center mb-2 text-secondary">
                   กรุณาตรวจสอบชื่ออาหาร
                 </h2>
-                {/* <ol>
+                <ol>
                   <li>ชื่ออาหาร: {aiData?.foodName ? aiData.foodName : ""}</li>
                   <li>
                     คาร์บ: {aiData?.carbs ? aiData.carbs + " (กรัม)" : ""}
@@ -497,8 +503,8 @@ export function FoodForm() {
                       ? aiData.foodCertainty * 100 + "%"
                       : ""}{" "}
                   </li>
-                </ol> */}
-                <ol>
+                </ol>
+                {/* <ol>
                   <li>
                     {"1. "}ชื่ออาหาร: {mockDataFromAi.foodName}
                   </li>
@@ -509,7 +515,7 @@ export function FoodForm() {
                     {"3. "}ความมั่นใจผลประเมิน:{" "}
                     {mockDataFromAi.foodCertainty * 100 + "%"}
                   </li>
-                </ol>
+                </ol> */}
                 <div className="flex flex-row gap-2">
                   <Button
                     variant={"outline"}
