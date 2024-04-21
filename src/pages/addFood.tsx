@@ -29,7 +29,7 @@ import { CalendarIcon } from "@radix-ui/react-icons"
 import { format } from "date-fns"
 import { NextPage } from "next"
 import { useRouter } from "next/router"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import io from "socket.io-client"
 import { z } from "zod"
@@ -61,6 +61,7 @@ const formSchema = z.object({
 
 export function FoodForm() {
   const { setValue } = useForm()
+  const [showCalibratingModal, setShowCalibratingModal] = useState(true)
   const router = useRouter()
   const [pixelArray, setPixelArray] = useState<number[][] | null>(null)
   const [foodName, setFoodName] = useState<string>("")
@@ -232,19 +233,30 @@ export function FoodForm() {
           setAiData(content)
           setValue("name", aiData?.foodName || "")
           setShowPopup(true)
+          setShowCalibratingModal(false)
         })
 
         console.log(
           "Final dataToSend for foodAiAuto:",
           dataToSendFoodAiAutoInner
         )
-        // setShowPopup(true)
+        setShowCalibratingModal(true)
       }
       img.src = imageUrl
     } catch (error) {
       console.error("Error handling upload:", error)
     }
   }
+
+  useEffect(() => {
+    // Simulating AI calibration delay
+    const calibrateAI = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulating a 2-second delay
+      setShowCalibratingModal(false) // Hide the modal after calibration
+    }
+
+    calibrateAI()
+  }, []) // Empty dependency array ensures the effect runs only once
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     // const imageId = await imageToDb(uploadedFiles)
@@ -483,6 +495,14 @@ export function FoodForm() {
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+          {/* Modal to show "AI Calibrating..." */}
+          {showCalibratingModal && (
+            <div className="calibrating-modal">
+              <div className="modal-content">
+                <p>AI กำลังประมวนผล โปรดรอสักครู่...</p>
+              </div>
             </div>
           )}
           {showPopup && (
