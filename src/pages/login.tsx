@@ -22,10 +22,10 @@ import { NextPage } from "next"
 import Link from "next/link"
 
 const formSchema = z.object({
-  // username: z.string().min(2, {
-  //   message: "Username must be at least 2 characters.",
-  // }),
-  username: z.string(),
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
+  // username: z.string(),
   password: z.string(),
 })
 

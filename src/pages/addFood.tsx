@@ -238,7 +238,7 @@ export function FoodForm() {
           "Final dataToSend for foodAiAuto:",
           dataToSendFoodAiAutoInner
         )
-        setShowPopup(true)
+        // setShowPopup(true)
       }
       img.src = imageUrl
     } catch (error) {
