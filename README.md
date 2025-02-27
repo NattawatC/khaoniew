@@ -1,40 +1,53 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 📝 KhaoNiew
 
-## Getting Started
+This project aims to provide a user-friendly web and mobile app for nutritional monitoring in rural areas. Users can log their meals, and the app will analyze their nutrient intake, showing how much more they can eat that day. Healthcare providers can monitor patients' diets, set dietary limits, and receive alerts when a user exceeds nutrient recommendations.
 
-First, run the development server:
+## 📄 Pages
+- Login
+- Register
+- Meal Overview
+- Add Meal
+- Review
+- Profile
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🖋️ Login
+![Readme1](https://github.com/NattawatC/checkit/assets/90686843/e404169b-d56f-428f-9211-87ac16828b3e.png)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### ✏️ Register
+![Readme2](https://github.com/NattawatC/checkit/assets/90686843/b8f26bef-dab8-4c56-85b4-5af8388d92a0.png)
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### 📌 Meal Overview
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+![Readme3](https://github.com/NattawatC/checkit/assets/90686843/b495d8e2-c085-4aaf-8a15-58742515c22f.png)
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Learn More
+### 📝 Add Meal
 
-To learn more about Next.js, take a look at the following resources:
+![Readme4](https://github.com/NattawatC/checkit/assets/90686843/d3eaf93c-7a3b-46ff-ac44-4794d447c211.png)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+### 🤝🏻 Review
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+![Readme5](https://github.com/NattawatC/checkit/assets/90686843/15af2524-2605-430b-9a66-82831962bb84.png)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+
+### 👤 Profile
+
+![Readme6](https://github.com/NattawatC/checkit/assets/90686843/95506ba0-2e10-4aa9-a52f-1b0caf100671.png)
+
+
+
+## 💻 Technology
+### FrontEnd 
+The application is developed using NextJS, TailwindCSS, and Shadcn.
+### BackEnd
+The application is developed using Nest.js, mySQL, and TypeORM.\
+Git Repo: https://github.com/NattawatC/new-khaoniew-backend
+
+## 🎓 Group
+64011331 [Akararat Pattanamontri](https://github.com/)\
+64011478 [Nattawat Chaokraisith](https://github.com/NattawatC)\
+64011642 [Surachat Dolayanukloh](https://github.com/)\
