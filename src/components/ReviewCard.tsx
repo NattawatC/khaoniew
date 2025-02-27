@@ -16,24 +16,62 @@ import { FaFistRaised } from "react-icons/fa"
 
 interface FoodCardProps {
   date: string
+  patientId: string
+  mealId: number
   meal: string
   foodName: string
-  carbs: number
+  carbs: string
   review: string
   reviewBy: string
+  updateReviewCallback: () => void;
 }
 
 const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
   date,
+  patientId,
+  mealId,
   meal,
   foodName,
   carbs,
   review,
   reviewBy,
+  updateReviewCallback
 }) => {
-  const [showButton, setShowButton] = useState(false)
+  const [reviewText, setReviewText] = useState("")
+  const staffName = localStorage.getItem("staffName")
+  const formattedDate = new Date(date).toLocaleDateString("th-TH", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  })
 
-  console.log(showButton)
+  function submitReview() {
+    const updateData = {
+      review: reviewText,
+      reviewBy: staffName,
+    }
+
+    fetch(
+      `http://localhost:4263/patients/${patientId}/meals/${mealId}/feedbacks`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateData),
+      }
+    )
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to update review")
+        }
+        console.log("Review updated successfully")
+        updateReviewCallback()
+      })
+      .catch((error) => {
+        console.error("Error updating review:", error)
+      })
+  }
 
   return (
     <div className="flex flex-col gap-2 bg-white rounded-md p-5 text-text">
@@ -41,7 +79,8 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1">
           <p className="font-bold">
-            บันทึกประจำวันที่ : <span className="font-normal">{date}</span>
+            บันทึกประจำวันที่ :{" "}
+            <span className="font-normal">{formattedDate}</span>
           </p>
           <p className="font-bold">
             มื้ออาหาร : <span className="font-normal">{meal}</span>
@@ -61,16 +100,16 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
         </div>
 
         <div className="flex flex-col">
-          <p className="font-bold">รีวิว :</p>
-          {review && review.trim() !== "" ? (
+          <p className="font-bold">ความคิดเห็นจากผู้เชี่ยวชาญ :</p>
+          {review && review.trim() !== "รอการรีวิว..." ? (
             <p>{review}</p>
           ) : (
             <p className="text-text opacity-40">รอการรีวิว...</p>
           )}
         </div>
         <p className="font-bold">
-          รีวิวโดย :{" "}
-          {reviewBy && reviewBy.trim() !== "" ? (
+          โดย :{" "}
+          {reviewBy && reviewBy.trim() !== "ไม่ระบุ" ? (
             <span className="font-normal">{reviewBy}</span>
           ) : (
             <span className="font-normal text-text opacity-40">ไม่ระบุ</span>
@@ -79,7 +118,7 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button className="bg-secondary text-white p-2 w-full rounded-md">
-              รีวิว
+              ความคิดเห็นจากผู้เชี่ยวชาญ
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -91,13 +130,20 @@ const ReviewCard: React.FunctionComponent<FoodCardProps> = ({
                 <Textarea
                   className="text-base text-text"
                   placeholder="เขียนรีวิว..."
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
                 />
               </AlertDialogDescription>
-                <p className="font-bold">รีวิวโดย: <span className="font-normal">???</span></p>
+              <p className="font-bold">
+                โดย: <span className="font-normal">{staffName}</span>
+              </p>
             </AlertDialogHeader>
             <AlertDialogFooter className="flex flex-row items-center gap-2">
-              <AlertDialogAction className="bg-secondary text-white text-base rounded-md border-transparent w-full">
-                ส่งรีวิว
+              <AlertDialogAction
+                className="bg-secondary text-white text-base rounded-md border-transparent w-full"
+                onClick={submitReview}
+              >
+                ส่งความคิดเห็น
               </AlertDialogAction>
               <AlertDialogCancel className="hover:underline text-base text-secondary rounded-md w-full border-secondary">
                 ยกเลิก

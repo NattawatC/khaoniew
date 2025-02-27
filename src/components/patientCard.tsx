@@ -1,15 +1,16 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import React from "react"
 import { useRouter } from "next/router"
+import React from "react"
 
 interface PatientCardProps {
-  status: string
+  status: boolean
   firstName: string
   lastName: string
   age: number
   gender: string
-  medicalCondition: string[]
+  medicalCondition: string
+  patientId: string
 }
 
 const PatientCard: React.FunctionComponent<PatientCardProps> = ({
@@ -19,26 +20,48 @@ const PatientCard: React.FunctionComponent<PatientCardProps> = ({
   age,
   gender,
   medicalCondition,
+  patientId,
 }) => {
-
   const router = useRouter()
 
-  const goToReviewPage = () =>{
-    router.push({
-      pathname: '/review',
-      query: { firstName, lastName},
-    });
+  const goToReviewPage = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:4263/patients/${patientId}/meals`
+      )
+      const response2 = await fetch(
+        `http://localhost:4263/patients/${patientId}`
+      )
+      if (!response.ok) {
+        throw new Error("Failed to fetch food data")
+      }
+      const patientMealData = await response.json()
+      const patientData = await response2.json()
+      console.log("Food data:", patientMealData)
+      router.push({
+        pathname: "/review",
+        query: {
+          patientMealData: JSON.stringify(patientMealData),
+          thaiId: patientData.thaiId,
+          firstName: patientData.firstname,
+          lastName: patientData.lastname,
+          healthRiskScore: patientData.healthRiskScore,
+        },
+      })
+    } catch (error) {
+      console.error("Error fetching food data:", error)
+    }
   }
 
   return (
     <div className="flex flex-col gap-2 bg-white rounded-md p-5 text-text relative">
-      {status === "Not approved" ? (
-        <Badge className="w-auto absolute right-0 mr-4 text-xs bg-[#AD9E9F] text-white">
-          {status}
+      {status === true ? (
+        <Badge className="w-auto absolute right-0 mr-4 text-xs bg-[#AD9E9F] text-white font-normal">
+          รีวิวเรียบร้อย
         </Badge>
       ) : (
-        <Badge className="w-auto absolute right-0 mr-4 text-xs bg-secondary text-white">
-          {status}
+        <Badge className="w-auto absolute right-0 mr-4 text-xs bg-secondary text-white font-normal">
+          รอการรีวิว...
         </Badge>
       )}
       <div className="flex flex-col gap-1 text-base">
@@ -59,15 +82,22 @@ const PatientCard: React.FunctionComponent<PatientCardProps> = ({
         <hr className="bg-text opacity-30 rounded h-1" />
       </div>
 
-      <div>
+      <p className="font-bold">
+        - <span className="font-normal">{medicalCondition}</span>
+      </p>
+
+      {/* <div>
         <p className="font-bold text-secondary">โรคประจำตัว</p>
         <ul className="text-base font-normal text-secondary px-2">
           {medicalCondition.map((condition) => (
             <li key={condition}>- {condition}</li>
           ))}
         </ul>
-      </div>
-      <Button onClick={goToReviewPage} className="bg-secondary text-white text-base rounded-md">
+      </div> */}
+      <Button
+        onClick={goToReviewPage}
+        className="bg-secondary text-white text-base rounded-md"
+      >
         ดูข้อมูล
       </Button>
     </div>
