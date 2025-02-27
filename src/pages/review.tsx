@@ -1,4 +1,3 @@
-
 import Gumpun from "@/components/Gumpun"
 // import { Navbar } from "@/components/Navbar"
 import ReviewCard from "@/components/ReviewCard"
@@ -65,7 +64,7 @@ const Review: NextPage = () => {
 
   return (
     <>
-      {/* <Navbar username={}/> */}
+      {/* <Navbar /> */}
       <MainLayout className="flex flex-col gap-4 bg-primary">
         <div className="flex flex-col gap-4">
           <h1 className="flex justify-center text-3xl">
