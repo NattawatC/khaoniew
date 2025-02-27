@@ -11,32 +11,32 @@ This project aims to provide a user-friendly web and mobile app for nutritional 
 - Profile
 
 ### 🖋️ Login
-![Readme1](https://github.com/NattawatC/checkit/assets/90686843/e404169b-d56f-428f-9211-87ac16828b3e.png)
+![Readme1]()
 
 ### ✏️ Register
-![Readme2](https://github.com/NattawatC/checkit/assets/90686843/b8f26bef-dab8-4c56-85b4-5af8388d92a0.png)
+![Readme2]()
 
 
 ### 📌 Meal Overview
 
-![Readme3](https://github.com/NattawatC/checkit/assets/90686843/b495d8e2-c085-4aaf-8a15-58742515c22f.png)
+![Readme3]()
 
 
 ### 📝 Add Meal
 
-![Readme4](https://github.com/NattawatC/checkit/assets/90686843/d3eaf93c-7a3b-46ff-ac44-4794d447c211.png)
+![Readme4]()
 
 
 
 ### 🤝🏻 Review
 
-![Readme5](https://github.com/NattawatC/checkit/assets/90686843/15af2524-2605-430b-9a66-82831962bb84.png)
+![Readme5]()
 
 
 
 ### 👤 Profile
 
-![Readme6](https://github.com/NattawatC/checkit/assets/90686843/95506ba0-2e10-4aa9-a52f-1b0caf100671.png)
+![Readme6]()
 
 
 
